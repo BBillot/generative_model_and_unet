@@ -5,15 +5,15 @@
 %%%%%%%%%%%%%%%%%%%%%% generation of the parameters %%%%%%%%%%%%%%%%%%%%%%%
 
 % General parameters of the image
-width = 64;              % Set Width of the image (integer)
-height = 64;             % Set Height (integer)
-negative_image = 0;       % 0=white axons on black background, 1=black axons on white background
+width = 64;                % Set Width of the image (integer)
+height = 64;               % Set Height (integer)
+negative_image = 0;        % 0=white axons on black background, 1=black axons on white background
 
 % Set the different sources of noise
 sigma_noise_min = 10;      % Set min gaussian white noise level (integer)
 sigma_noise_max = 10;      % Set max gaussian white noise level (integer)
-lambdaMin = 7;            % Set max Poisson noise level (integer)
-lambdaMax = 7;            % Set min Poisson noise level (integer)
+lambdaMin = 7;             % Set max Poisson noise level (integer)
+lambdaMax = 7;             % Set min Poisson noise level (integer)
 
 % Numbers of Axons and branches
 MinAxons = 2;              % Set minimum number of axons in the image (integer)
@@ -36,7 +36,7 @@ straightBranching = 13;    % Distance from which overlapping is checked between 
 SegmentationThreshold = 4.7; % Threshold for obtaining the true segmentation (set to Inf to get it all) (real number)
 
 % Intensity of the axons
-sigma_spread = 1;        % std deviation of the gaussian profile for axons (real number)
+sigma_spread = 1;          % std deviation of the gaussian profile for axons (real number)
 MinAxonIntensity = 60;     % Minimum level of intensity for an axon (integer between 0 and 100)
 MaxAxonIntensity = 90;     % Maximum level of intensity for an axon (integer between 0 and 100)
 MinPeriod = 0.1;           % Min spatial period for intensity variation along axons for a cosine profile (real number)
@@ -56,7 +56,7 @@ sigma_noise_bouton = 1;    % Set the noise level for the boutons  (real number)
 
 % Shape of the circles
 MinNbCircles = 6;          % Set the min number of circles in the image (integer)
-MaxNbCircles = 9;         % Set the max number of circles in the image (integer)
+MaxNbCircles = 9;          % Set the max number of circles in the image (integer)
 MinRadius = 3;             % Minimum radius for a cell (integer)
 MaxRadius = 20;            % Maximum radius for a cell (integer) 
 CircleBrightness = 1;      % Set if we want bright cells (0/1)
@@ -123,4 +123,4 @@ AxonParameters(1).sigma_noise_circle = sigma_noise_circle;
 %%%%%%%%%%%%%%%%%%% saving the structure in a JSON file %%%%%%%%%%%%%%%%%%%
 
 clearvars -except AxonParameters
-savejson('',AxonParameters,'parameters_hard_512.json');
+savejson('',AxonParameters,'parameters_64x64_images.json');

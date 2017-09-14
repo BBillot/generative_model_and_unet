@@ -9,23 +9,27 @@
 
 % The resulting images ('images.mat'), the axon segmentations 
 % ('axon_masks.mat') and the bouton segmentations ('bouton_masks.mat') are 
-% saved in separate files. The last three are 3D matrices where the 
-% different single elements are concatanated along the third dimension.
+% saved in separate files.
+
+% Depending on size and the amount of data that one wishes to generate,
+% Matalb might not be able to save the created matrices. That's why we can
+% divide the images in several chunks. The number of the chunk will
+% automatically be appended to the name of the saved files.
 
 tic
 clear;
 close all;
-%rng(2);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 100;                             % number of images per chunk of data
+N = 200;                             % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
-json = 'parameters_hard_512.json';   % name of the json file to load
+json = 'parameters_64x64_images.json';   % name of the json file to load
 
-image_files = '/Users/benjaminbillot/Documents/Imperial/Project/test_images_crop_128';
-axon_mask_files = '/Users/benjaminbillot/Documents/Imperial/Project/test_masks_crop_128';
-filled_images_files = '/Users/benjaminbillot/Documents/Imperial/Project/test_filled_crop_128';
-bouton_mask_files = '/Users/benjaminbillot/Documents/Imperial/Project/test_boutons_crop_128';
+image_files = 'path_to_file/file_name';
+axon_mask_files = 'path_to_file/file_name';
+filled_images_files = 'path_to_file/file_name';
+bouton_mask_files = 'path_to_file/file_name';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% data generation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,7 +45,7 @@ for chunk=1:Nchunks
         images_gaps_filled(:,:,i) = PatchWithoutGap;
         axon_masks(:,:,i) = AxonSegmentation;
         bouton_masks(:,:,i) = BoutonSegmentation;
-        if mod(i,100)==0
+        if mod(i,50)==0
             disp(i);
         end 
     end
