@@ -1,4 +1,4 @@
-function [AxonsSeries,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,XStart,YStart,XEnd,YEnd]...
+function [finalAxonsSeries,finalAxonsPatchWithoutGap,finalAxonSegmentation,finalBoutonSegmentation,AxonsGTPoints,GapSize,XStart,YStart,XEnd,YEnd]...
     = getSeries(parameters,NbImages)
 
 % Main function for creating one image. The image is progressively filled
@@ -52,7 +52,8 @@ function [AxonsSeries,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,A
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% initialisation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %gets the value of each parameter in the parameters structure
-[width,height, negative_image,...
+[finalWidth,finalHeight, negative_image,...
+    NbImages,rowshift,colshift,...
     sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
     MinAxons,MaxAxons,MinBran,MaxBran,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
@@ -61,6 +62,9 @@ function [AxonsSeries,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,A
     MinNbBouton,MaxNbBouton,MinBouRadius,MaxBouRadius,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,...
     MinNbCircles,MaxNbCircles,CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
     = getValues(parameters);
+
+width = finalWidth+rowshift-1;
+height = finalHeight+colshift-1;
 
 restart=0;
 while restart==0
@@ -234,8 +238,10 @@ AxonsVariations = AxonsVariations+sigma_noise_axon*randn(width,height);
 AxonsPatch = VaryingIntensityWithDistance(AxonsDistWithGap,'axons','gauss',sigma_spread,AxonsVariations);
 % same but with the matrix without gaps
 AxonsPatchWithoutGap = VaryingIntensityWithDistance(AxonsDistWithoutGap,'axons','gauss',sigma_spread,AxonsVariationsWithoutGap);
+AxonsPatchWithoutGap = repmat(AxonsPatchWithoutGap,[1,1,NbImages]);
 % gets the axon segmentation
 AxonSegmentation = (AxonsDistWithoutGap <SegmentationThreshold);
+AxonSegmentation = repmat(AxonSegmentation,[1,1,NbImages]);
 
 %%%%%%%%%%%%%%%%%% adding circles representing boutons %%%%%%%%%%%%%%%%%%%%
 
@@ -259,19 +265,11 @@ sigma_noise = randi([round(sigma_noise_min*100000),round(sigma_noise_max*100000)
 lambda = randi([lambdaMin,lambdaMax]);
 AxonsSeries = noise(AxonsSeries, sigma_noise, lambda, width, height);
 
-%%%%%%%%%%%%%%%% Converting the data into greyscale images %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%% postprocessing images %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-AxonsPatchWithoutGap(AxonsPatchWithoutGap<0) = 0;
-AxonsSeries = floor(AxonsSeries*255/max(max(max(AxonsSeries))));
-AxonsPatchWithoutGap = floor(AxonsPatchWithoutGap*255/max(max(AxonsPatchWithoutGap)));
-AxonSegmentation = 255*AxonSegmentation;
-BoutonSegmentation = 255*BoutonSegmentation;
-
-% take the negative of image
-if negative_image
-    AxonsSeries = 255*ones(width,height)-AxonsSeries;
-    AxonsPatchWithoutGap = 255*ones(width,height)-AxonsPatchWithoutGap;
-end
+[finalAxonsSeries,finalAxonsPatchWithoutGap,finalAxonSegmentation,finalBoutonSegmentation] = postprocess(...
+    AxonsSeries,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
+    rowshift,colshift,finalHeight,finalWidth,NbImages,negative_image);
 
 end
 
@@ -369,6 +367,7 @@ end
 end
 
 function [width,height,negative_image,...
+    NbImages,rowshift,colshift,...
     sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
     MinAxons,MaxAxons,MinBran,MaxBran,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
@@ -383,6 +382,10 @@ function [width,height,negative_image,...
 width = parameters(1).width;
 height = parameters(1).height;
 negative_image = parameters(1).negative_image;
+
+NbImages = parameters(1).NbImages;
+rowshift = parameters(1).rowshift;
+colshift = parameters(1).colshift;
 
 sigma_noise_min = parameters(1).sigma_noise_min;
 sigma_noise_max = parameters(1).sigma_noise_max;

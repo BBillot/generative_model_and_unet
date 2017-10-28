@@ -12,12 +12,12 @@ size1 = 2;
 size2 = 50;
 
 Patch = floor(Patch*255/max(max(max(Patch))));
-Poisson = poissrnd(lambda,height,width);
-Gauss = sigmawn * randn(height,width);
-Oblur1 = fspecial('gaussian', size1, sigma1);
-Oblur2 = 25*fspecial('gaussian', size2, sigma2);
 
 for im=1:size(Patch,3)
+    Poisson = poissrnd(lambda,height,width);
+    Gauss = sigmawn * randn(height,width);
+    Oblur1 = fspecial('gaussian', size1, sigma1);
+    Oblur2 = 25*fspecial('gaussian', size2, sigma2);
     Patch(:,:,im) = imfilter(Patch(:,:,im),Oblur1,'replicate') + imfilter(Poisson,Oblur2,'replicate') + Gauss;
 end
 Patch(Patch<0) = 0;

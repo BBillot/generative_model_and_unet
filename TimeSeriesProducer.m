@@ -24,7 +24,6 @@ close all;
 
 N = 1;                               % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
-NbImages = 6;
 json = 'parameters_256x256_images.json';   % name of the json file to load
 
 image_files = 'path_to_file/file_name';
@@ -41,10 +40,10 @@ for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
         [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,...
-            XStart,YStart,XEnd,YEnd] = getSeries(parameters,NbImages);
+            XStart,YStart,XEnd,YEnd] = getSeries(parameters);
         images(:,:,:,i) = Patch;
-        images_gaps_filled(:,:,i) = PatchWithoutGap;
-        axon_masks(:,:,i) = AxonSegmentation;
+        images_gaps_filled(:,:,:,i) = PatchWithoutGap;
+        axon_masks(:,:,:,i) = AxonSegmentation;
         bouton_masks(:,:,:,i) = BoutonSegmentation;
         if mod(i,50)==0
             disp(i);
@@ -65,6 +64,9 @@ for chunk=1:Nchunks
 end
 
 im = images(:,:,:,1);
+ma = axon_masks(:,:,:,1);
+ax = images_gaps_filled(:,:,:,1);
+bo = bouton_masks(:,:,:,1);
 
 figure;
 Plotcols = 3; % This is kind of set arbitrarily 
