@@ -22,9 +22,9 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 200;                             % number of images per chunk of data
+N = 1;                             % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
-json = 'parameters_64x64_images.json';   % name of the json file to load
+json = 'parameters_256x256_images.json';   % name of the json file to load
 
 image_files = 'path_to_file/file_name';
 axon_mask_files = 'path_to_file/file_name';
@@ -51,15 +51,19 @@ for chunk=1:Nchunks
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
-    disp('saving data');
-    path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'images','-v7.3')
-    path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'axon_masks','-v7.3')
-    path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'images_gaps_filled','-v7.3')
-    path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'bouton_masks','-v7.3')
+%     disp('saving data');
+%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'images','-v7.3')
+%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'axon_masks','-v7.3')
+%     path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'images_gaps_filled','-v7.3')
+%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'bouton_masks','-v7.3')
     
 end
+
+im = images(:,:,1);
+ma=axon_masks(:,:,1);
+
 toc

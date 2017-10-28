@@ -125,7 +125,7 @@ while restart==0
             AxonPoly = MakeAxonPoly(ControlPoints);
             
             %matrix containing the points of the spline
-            AxonsGTPoints(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
+            AxonsGTPoints(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints); %coordinates of the GT Points
             AxonsGTPoints(3,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) =z ;
             AxonsGTPoints(4,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = 1;
             AxonsGTPoints(5,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = pointer+1;
@@ -181,9 +181,9 @@ while restart==0
                 end
                 AxonPoly = MakeAxonPoly(ControlPoints);
                 AxonsGTPoints(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
-                AxonsGTPoints(3,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = z;
-                AxonsGTPoints(4,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = i;
-                AxonsGTPoints(5,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = pointer+1;
+                AxonsGTPoints(3,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = z; % number of the axon it belongs to
+                AxonsGTPoints(4,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = i; % number of the axon's branch it belongs to
+                AxonsGTPoints(5,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = pointer+1; % number of the branch it belongs to (in agreggate) 
                 
                 variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
                     (variations(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod);
@@ -241,8 +241,9 @@ AxonSegmentation = (AxonsDistWithoutGap <SegmentationThreshold);
 
 %modifies the AxonPatch matrix to add boutons, and creates the bouton
 %segmentation
-[AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBouton,MaxNbBouton, MinBouRadius, MaxBouRadius,...
+[AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBouton, MaxNbBouton,...
     MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness);
+    % ,MinBouRadius,MaxBouRadius)
 
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 
@@ -319,91 +320,6 @@ tt = linspace(0,1,npoints);
 AxonAxisGT = fnval(AxonsPoly,tt); %find the value of the spline for all values of tt
 AxonPolyDer = fnder(AxonsPoly,1); % differentiates VesselPoly
 AxonDirGT = fnval(AxonPolyDer,tt); %find the values of the derivative at the spline points
-
-end
-
-function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBou,MaxNbBou, MinBouRadius, MaxBouRadius,...
-    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness)
-
-% This function takes an image with axons as input and returns the same
-% image with synaptic boutons having been added (AxonsPatch). The boutons
-% are represented as circles. Their center is in the vicinity of a randomly
-% picked spline point. The intensity of each pixel belonging to the bouton
-% depends on its distance to the center (function
-% VaryingIntensityWithDistance) with a gaussian profile. The average
-% brightness is controlled by the parameter BouBrightness, and the expected
-% variance (v) is calculated here.
-
-% The function also returns the segmentation of the synaptic boutons
-% (BoutonSegmentation).
-
-NBou = randi([MinNbBou,MaxNbBou]);
-BoutonSegmentation = zeros(height,width);
-
-for I=1:NBou
-    
-    BouBrightness = randi([MinBouBrightness,MaxBouBrightness])/100;
-    %radius = randi([MinBouRadius,MaxBouRadius]);
-    Point = randi(length(AxonsGTPoints));
-    center = round([AxonsGTPoints(1,Point),AxonsGTPoints(2,Point)]);
-    radius = floor(thickness(AxonsGTPoints(5,Point)))+1;
-    %dev = randi([-floor(thickness(AxonsGTPoints(3,Point))),floor(thickness(AxonsGTPoints(3,Point)))]);
-    dev = 0;
-    center = min(max(center+dev,1),width);
-    
-    if (center(1)-radius>0 && center(2)-radius>0 && center(1)+radius<=width && center(2)+radius<=height) %middle
-        absInf=center(1)-radius; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=center(2)+radius;
-        refAbs=radius+1; refOrd=radius+1;
-        
-    elseif (center(1)-radius<=0 && center(2)-radius<=0) %top left
-        absInf=1; absSup=center(1)+radius; ordInf=1; ordSup=center(2)+radius;
-        refAbs=center(1); refOrd=center(2);
-        
-    elseif (center(2)+radius>width && center(1)-radius<=0) %bottom left
-        absInf=1; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=height;
-        refAbs=center(1); refOrd=radius+1;
-        
-    elseif (center(2)-radius<=0 && center(1)+radius>height) %top right
-        absInf=center(1)-radius; absSup=width; ordInf=1; ordSup=center(2)+radius;
-        refAbs=radius+1; refOrd=center(2);
-        
-    elseif (center(1)+radius>width && center(2)+radius>height) %bottom right
-        absInf=center(1)-radius; absSup=width; ordInf=center(2)-radius; ordSup=height;
-        refAbs=radius+1; refOrd=radius+1;
-        
-    elseif (center(2)-radius<=0) %top
-        absInf=center(1)-radius; absSup=center(1)+radius; ordInf=1; ordSup=center(2)+radius;
-        refAbs=radius+1; refOrd=center(2);
-        
-    elseif (center(2)+radius>width) % bottom
-        absInf=center(1)-radius; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=height;
-        refAbs=radius+1; refOrd=radius+1;
-        
-    elseif (center(1)-radius<=0) %left
-        absInf=1; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=center(2)+radius;
-        refAbs=center(1); refOrd=radius+1;
-        
-    elseif (center(1)+radius>width) %right
-        absInf=center(1)-radius; absSup=width; ordInf=center(2)-radius; ordSup=center(2)+radius;
-        refAbs=radius+1; refOrd=radius+1;
-    end
-    
-    [X,Y] = meshgrid(1:absSup-absInf+1,1:ordSup-ordInf+1);
-    boutonDist = sqrt((X(:,:)-refAbs).^2+(Y(:,:)-refOrd).^2); %gets the distance to the center
-    v = sqrt(-radius^2/(2*log(0.05/BouBrightness))); %std deviation used for the gaussian profile
-    Indices = find(boutonDist>=radius); %gets the indice of the points belonging to the bouton
-    for i = 1:length(Indices)
-        thisRow = Y(Indices(i));
-        thisCol = X(Indices(i));
-        boutonDist(thisRow,thisCol) = Inf; %gets the distance for each point plus noise
-    end
-    bousegm = (boutonDist<Inf); % gets all the point of the bouton
-    boutonDist = boutonDist+BouSigma*randn(ordSup-ordInf+1,absSup-absInf+1);
-    boutonDist = VaryingIntensityWithDistance(boutonDist,'circle','gauss',v,0,BouBrightness); %gets the intensity of bouton
-    AxonsPatch(ordInf:ordSup,absInf:absSup) = max(AxonsPatch(ordInf:ordSup,absInf:absSup),boutonDist); %puts back the bouton in the image
-    BoutonSegmentation(ordInf:ordSup,absInf:absSup) = max(BoutonSegmentation(ordInf:ordSup,absInf:absSup),bousegm); %updates the BoutonSegmentation mask
-end
-BoutonSegmentation = logical(BoutonSegmentation);
 
 end
 
@@ -895,43 +811,7 @@ end
 
 end
 
-function I = VaryingIntensityWithDistance(d,StructureType,IntProfileType,sigma_spread,AxonsVariations,brightness)
 
-% Function to take an n-dimensional array of distances to centreline (d)
-% and to return an array, I, of the same size and dimensions of d in which
-% the values in the array are a function of d.
-% Current options include a Butterworth, a Gaussian and a flat profile.
-% We differenciate two cases: intensity along an axon that varies according
-% AxonVariations, and intensity for circles.
-
-
-switch StructureType
-    
-    case {'axons'}
-        switch lower(IntProfileType)
-            case {'butter','butterworth'}
-                I = 1./(1+(d/2).^4); % 4th order Butterworth, radius of vessel of around 2
-            case {'flat'}
-                I = abs(d)<2;
-            case {'gaussian','gauss'}
-                I = exp(-d.^2/(2*sigma_spread^2))/sqrt(2*pi*sigma_spread^2).*AxonsVariations;
-        end
-        
-    case {'circle'}
-        switch lower(IntProfileType)
-            case {'butter','butterworth'}
-                I = 1./(1+(d/2).^4); % 4th order Butterworth, radius of vessel of around 2
-            case {'flat'}
-                I = abs(d)<2;
-            case {'gaussian','gauss'}
-                I = exp(-d.^2/(2*sigma_spread^2))*brightness;
-        end
-        
-        
-end
-
-
-end
 
 function Patch = noise (Patch,sigmawn,lambda,height,width)
 

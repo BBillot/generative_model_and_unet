@@ -5,8 +5,8 @@
 %%%%%%%%%%%%%%%%%%%%%% generation of the parameters %%%%%%%%%%%%%%%%%%%%%%%
 
 % General parameters of the image
-width = 64;                % Set Width of the image (integer)
-height = 64;               % Set Height (integer)
+width = 256;                % Set Width of the image (integer)
+height = 256;               % Set Height (integer)
 negative_image = 0;        % 0=white axons on black background, 1=black axons on white background
 
 % Set the different sources of noise
@@ -46,7 +46,7 @@ BranchProfile = 'cosine';  % Type of intensity variations along a daughter branc
 sigma_noise_axon = 0.055;  % Set the white noise level for an axon (real number)
 
 % Shape of the synaptic Boutons
-MinNbBouton = 5;           % Set the minimum number of boutons (integer)
+MinNbBouton = 7;           % Set the minimum number of boutons (integer)
 MaxNbBouton = 7;           % Set the maximum number of boutons (integer)
 MinBouRadius = 3;          % Set the minimum radius of  the boutons (integer)
 MaxBouRadius = 3;          % Set the maximum radius of  the boutons (integer)
@@ -123,4 +123,4 @@ AxonParameters(1).sigma_noise_circle = sigma_noise_circle;
 %%%%%%%%%%%%%%%%%%% saving the structure in a JSON file %%%%%%%%%%%%%%%%%%%
 
 clearvars -except AxonParameters
-savejson('',AxonParameters,'parameters_64x64_images.json');
+savejson('',AxonParameters,'parameters_256x256_images.json');
