@@ -22,10 +22,10 @@ for im=1:NbImages
     colstart = randi([1,colshift]);
     finalAxonsSeries(:,:,im) =  AxonsSeries(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
     finalAxonsSeries(:,:,im) = floor(finalAxonsSeries(:,:,im)*255/max(max(finalAxonsSeries(:,:,im))));
-    finalAxonsPatchWithoutGap(:,:,im) = AxonsPatchWithoutGap(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
+    finalAxonsPatchWithoutGap(:,:,im) = AxonsPatchWithoutGap(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1);
     finalAxonsPatchWithoutGap(finalAxonsPatchWithoutGap<0) = 0;
     finalAxonsPatchWithoutGap(:,:,im) = floor(finalAxonsPatchWithoutGap(:,:,im)*255/max(max(finalAxonsPatchWithoutGap(:,:,im))));
-    finalAxonSegmentation(:,:,im) = AxonSegmentation(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
+    finalAxonSegmentation(:,:,im) = AxonSegmentation(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1);
     finalBoutonSegmentation(:,:,im) = BoutonSegmentation(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
 end
 finalAxonSegmentation = 255*finalAxonSegmentation;

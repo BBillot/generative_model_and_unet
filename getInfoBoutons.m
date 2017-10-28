@@ -1,18 +1,41 @@
-function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness)
+function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages)
 
-NbImage = randi([4,5]);
-boutonsInfo = zeros(NBou,6);
+%boutonsInfo = zeros(NBou,6);
+boutonsInfo = cell(NBou,6);
 Points = randi(length(AxonsGTPoints),[1,NBou]);
 probBoutonInFirstImage = 0.6;
 
-% center of boutons
-boutonsInfo(:,1:2) = round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])';
-% radius
-boutonsInfo(:,3) = (floor(thickness(AxonsGTPoints(5,Points)))+1)'; 
-% image of apparition and duration of a bouton
-boutonsInfo(:,4:5) = selection(NbImage,NBou,probBoutonInFirstImage);
-% brightness of each bouton
-boutonsInfo(:,6) = randi([MinBouBrightness,MaxBouBrightness],NBou,1)/100;
+% boutonsInfo(:,1:2) = round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])';
+% boutonsInfo(:,3) = (floor(thickness(AxonsGTPoints(5,Points)))+1)';
+% boutonsInfo(:,4:5) = selection(NbImages,NBou,probBoutonInFirstImage);
+% boutonsInfo(:,6) = randi([MinBouBrightness,MaxBouBrightness],NBou,1)/100;
+
+%center of boutons
+boutonsInfo(:,1:2) = num2cell(round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])');
+%radius
+boutonsInfo(:,3) = num2cell((floor(thickness(AxonsGTPoints(5,Points)))+1)'); 
+%image of apparition and duration of a bouton
+boutonsInfo(:,4:5) = num2cell(selection(NbImages,NBou,probBoutonInFirstImage));
+%brightness of each bouton
+moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
+for bou=1:NBou
+    up = randi([0,1]);
+    if up
+        ma = moy(bou);
+        while ma==moy(bou)
+            ma = moy(bou) + (MaxBouBrightness/100-moy(bou))*rand;
+        end
+        brightness = moy(bou):(ma-moy(bou))/(boutonsInfo{bou,5}-1):ma;
+    else
+        mi = moy(bou);
+        while mi==moy(bou)
+            mi = MinBouBrightness/100 + (moy(bou)-MinBouBrightness/100)*rand;
+        end
+        brightness = moy(bou):-(moy(bou)-mi)/(boutonsInfo{bou,5}-1):mi;
+    end
+    
+    boutonsInfo{bou,6} = brightness;
+end
 
 %     BouBrightness = randi([MinBouBrightness,MaxBouBrightness])/100;
 %     %radius = randi([MinBouRadius,MaxBouRadius]);

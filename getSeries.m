@@ -238,10 +238,8 @@ AxonsVariations = AxonsVariations+sigma_noise_axon*randn(width,height);
 AxonsPatch = VaryingIntensityWithDistance(AxonsDistWithGap,'axons','gauss',sigma_spread,AxonsVariations);
 % same but with the matrix without gaps
 AxonsPatchWithoutGap = VaryingIntensityWithDistance(AxonsDistWithoutGap,'axons','gauss',sigma_spread,AxonsVariationsWithoutGap);
-AxonsPatchWithoutGap = repmat(AxonsPatchWithoutGap,[1,1,NbImages]);
 % gets the axon segmentation
 AxonSegmentation = (AxonsDistWithoutGap <SegmentationThreshold);
-AxonSegmentation = repmat(AxonSegmentation,[1,1,NbImages]);
 
 %%%%%%%%%%%%%%%%%% adding circles representing boutons %%%%%%%%%%%%%%%%%%%%
 

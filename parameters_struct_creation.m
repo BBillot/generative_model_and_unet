@@ -10,9 +10,9 @@ height = 256;                % Set Height (integer)
 negative_image = 0;          % 0=white axons on black background, 1=black axons on white background (boolean)
 
 % Parameters for time-series images
-NbImages = 6;
-rowshift= 5;
-colshift =5;
+NbImages = 6;                % Set numbers of images per time series (integer)
+rowshift = 50;                % Maximum row shift between images of the same time serie, 1=no shift (integer).
+colshift = 50;                % Maximum column shift between images of the same time serie, 1=no shift (integer).
 
 % Set the different sources of noise
 sigma_noise_min = 10;        % Set min gaussian white noise level (integer)

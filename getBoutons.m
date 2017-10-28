@@ -14,7 +14,7 @@ function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, 
 % (BoutonSegmentation).
 
 NBou = randi([MinNbBouton,MaxNbBouton]);
-boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness);
+boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages);
 
 switch nargin
     
