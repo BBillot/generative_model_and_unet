@@ -1,8 +1,19 @@
-function [bouton,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonInfo,noise,height,width)
+function [bouton,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonInfo,noise,height,width,image)
 
-center = boutonInfo(1:2);
-radius = boutonInfo(3);
-brightness = boutonInfo(6);
+%center = boutonInfo(1:2);
+%radius = boutonInfo(3);
+%brightness = boutonInfo(6);
+
+switch nargin 
+    case 4
+        center = boutonInfo{1};
+        radius = boutonInfo{2};
+        brightness = boutonInfo{5};
+    case 5 
+        center = boutonInfo{1};
+        radius = boutonInfo{2};
+        brightness = boutonInfo{5}(image-boutonInfo{3}+1);  
+end
 
 if (center(1)-radius>0 && center(2)-radius>0 && center(1)+radius<=width && center(2)+radius<=height) %middle
     absInf=center(1)-radius; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=center(2)+radius;

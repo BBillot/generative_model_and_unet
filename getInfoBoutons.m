@@ -1,9 +1,9 @@
 function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages)
 
 %boutonsInfo = zeros(NBou,6);
-boutonsInfo = cell(NBou,6);
+boutonsInfo = cell(NBou,5);
 Points = randi(length(AxonsGTPoints),[1,NBou]);
-probBoutonInFirstImage = 0.6;
+probBoutonInFirstImage = 0.4;
 
 % boutonsInfo(:,1:2) = round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])';
 % boutonsInfo(:,3) = (floor(thickness(AxonsGTPoints(5,Points)))+1)';
@@ -11,11 +11,11 @@ probBoutonInFirstImage = 0.6;
 % boutonsInfo(:,6) = randi([MinBouBrightness,MaxBouBrightness],NBou,1)/100;
 
 %center of boutons
-boutonsInfo(:,1:2) = num2cell(round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])');
+boutonsInfo(:,1) = mat2cell(round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])',ones(1,NBou));
 %radius
-boutonsInfo(:,3) = num2cell((floor(thickness(AxonsGTPoints(5,Points)))+1)'); 
+boutonsInfo(:,2) = num2cell((floor(thickness(AxonsGTPoints(5,Points)))+1)'); 
 %image of apparition and duration of a bouton
-boutonsInfo(:,4:5) = num2cell(selection(NbImages,NBou,probBoutonInFirstImage));
+boutonsInfo(:,3:4) = num2cell(selection(NbImages,NBou,probBoutonInFirstImage));
 %brightness of each bouton
 moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
 for bou=1:NBou
@@ -25,16 +25,16 @@ for bou=1:NBou
         while ma==moy(bou)
             ma = moy(bou) + (MaxBouBrightness/100-moy(bou))*rand;
         end
-        brightness = moy(bou):(ma-moy(bou))/(boutonsInfo{bou,5}-1):ma;
+        brightness = moy(bou):(ma-moy(bou))/(boutonsInfo{bou,4}-1):ma;
     else
         mi = moy(bou);
         while mi==moy(bou)
             mi = MinBouBrightness/100 + (moy(bou)-MinBouBrightness/100)*rand;
         end
-        brightness = moy(bou):-(moy(bou)-mi)/(boutonsInfo{bou,5}-1):mi;
+        brightness = moy(bou):-(moy(bou)-mi)/(boutonsInfo{bou,4}-1):mi;
     end
     
-    boutonsInfo{bou,6} = brightness;
+    boutonsInfo{bou,5} = brightness;
 end
 
 %     BouBrightness = randi([MinBouBrightness,MaxBouBrightness])/100;

@@ -35,9 +35,9 @@ switch nargin
         AxonsSeries = repmat(AxonsPatch,[1,1,NbImages]);
         for image=1:NbImages
             for bou=1:NBou
-                if(image==boutonsInfo(bou,4) || (boutonsInfo(bou,4)<image && boutonsInfo(bou,4)+boutonsInfo(bou,5)>=image))
+                if(image==boutonsInfo{bou,3} || (boutonsInfo{bou,3}<image && boutonsInfo{bou,3}+boutonsInfo{bou,4}>image))
                     %draw a bouton
-                    [boutonDist,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonsInfo(bou,:),BouSigma,height,width);
+                    [boutonDist,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonsInfo(bou,:),BouSigma,height,width,image);
                     % add it to the patch
                     AxonsSeries(ordInf:ordSup,absInf:absSup,image) = max(AxonsSeries(ordInf:ordSup,absInf:absSup,image),boutonDist); %puts back the bouton in the image
                     %BoutonSegmentation(ordInf:ordSup,absInf:absSup,image) = bou*max(BoutonSegmentation(ordInf:ordSup,absInf:absSup,image),boutonSegm); %updates the BoutonSegmentation mask
