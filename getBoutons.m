@@ -1,5 +1,5 @@
 function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBouton,MaxNbBouton,...
-    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, NbImages)
+    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, NbImages,probBoutonInFirstImage)
 %, MinBouRadius,MaxBouRadius)
 
 % This function takes an image with axons as input and returns the same
@@ -14,11 +14,11 @@ function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, 
 % (BoutonSegmentation).
 
 NBou = randi([MinNbBouton,MaxNbBouton]);
-boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages);
 
 switch nargin
     
     case 10
+        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness);
         BoutonSegmentation = zeros(height,width);
         for bou=1:NBou
             %draw a bouton
@@ -30,7 +30,8 @@ switch nargin
         end
         BoutonSegmentation = logical(BoutonSegmentation);
         
-    case 11
+    case 12
+        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages,probBoutonInFirstImage);
         BoutonSegmentation = zeros(height,width,NbImages);
         AxonsSeries = repmat(AxonsPatch,[1,1,NbImages]);
         for image=1:NbImages

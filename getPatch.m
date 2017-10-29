@@ -52,7 +52,7 @@ function [AxonsPatch,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,Ax
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% initialisation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %gets the value of each parameter in the parameters structure
-[width,height, negative_image,...
+[width,height, negative_image,maxIntensity,...
     sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
     MinAxons,MaxAxons,MinBran,MaxBran,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
@@ -262,15 +262,15 @@ AxonsPatch = noise(AxonsPatch, sigma_noise, lambda, width, height);
 %%%%%%%%%%%%%%%% Converting the data into greyscale images %%%%%%%%%%%%%%%%
 
 AxonsPatchWithoutGap(AxonsPatchWithoutGap<0) = 0;
-AxonsPatch = floor(AxonsPatch*255/max(max(AxonsPatch)));
-AxonsPatchWithoutGap = floor(AxonsPatchWithoutGap*255/max(max(AxonsPatchWithoutGap)));
-AxonSegmentation = 255*AxonSegmentation;
-BoutonSegmentation = 255*BoutonSegmentation;
+AxonsPatch = floor(AxonsPatch*maxIntensity/max(max(AxonsPatch)));
+AxonsPatchWithoutGap = floor(AxonsPatchWithoutGap*maxIntensity/max(max(AxonsPatchWithoutGap)));
+AxonSegmentation = maxIntensity*AxonSegmentation;
+BoutonSegmentation = maxIntensity*BoutonSegmentation;
 
 % take the negative of image
 if negative_image
-    AxonsPatch = 255*ones(width,height)-AxonsPatch;
-    AxonsPatchWithoutGap = 255*ones(width,height)-AxonsPatchWithoutGap;
+    AxonsPatch = maxIntensity*ones(width,height)-AxonsPatch;
+    AxonsPatchWithoutGap = maxIntensity*ones(width,height)-AxonsPatchWithoutGap;
 end
 
 end
@@ -488,7 +488,7 @@ while NoValidDirection
 end
 end
 
-function [width,height,negative_image,...
+function [width,height,negative_image,maxIntensity,...
     sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
     MinAxons,MaxAxons,MinBran,MaxBran,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
@@ -503,6 +503,7 @@ function [width,height,negative_image,...
 width = parameters(1).width;
 height = parameters(1).height;
 negative_image = parameters(1).negative_image;
+maxIntensity = parameters(1).maxIntensity;
 
 sigma_noise_min = parameters(1).sigma_noise_min;
 sigma_noise_max = parameters(1).sigma_noise_max;

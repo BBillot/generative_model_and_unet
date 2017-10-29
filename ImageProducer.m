@@ -66,4 +66,6 @@ end
 im = images(:,:,1);
 ma=axon_masks(:,:,1);
 
+figure; imagesc(im); colormap(gray); axis off;
+
 toc

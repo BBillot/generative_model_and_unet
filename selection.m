@@ -1,5 +1,11 @@
 function imageOfApparition = selection(NbImage,NBou,probBoutonInFirstImage)
 
+% This function generates the image of apparition and the duration of each
+% bouton. The probability of appearing on the first image is set by the
+% corresponding input. The prob of appearing on the other image is uniform.
+% The duration of a bouton is randomly picked between the image of app and
+% the total number of images.
+
 a = rand(NBou,1);
 firstImage = 1-probBoutonInFirstImage;
 b = firstImage/NbImage:firstImage/NbImage:firstImage;
@@ -21,7 +27,7 @@ imageOfApparition(imageOfApparition(:,1)==0) = NbImage;
 imageOfApparition(:,2) = NbImage-imageOfApparition(:,1)+1;
 for i=1:NBou
     if imageOfApparition(i,2)-1>2
-        imageOfApparition(i,2) = randi([2,max(2,imageOfApparition(i,2)-1)]);
+        imageOfApparition(i,2) = randi([2,max(2,imageOfApparition(i,2))]);
     end
 end
 

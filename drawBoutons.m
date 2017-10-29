@@ -1,8 +1,9 @@
 function [bouton,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonInfo,noise,height,width,image)
 
-%center = boutonInfo(1:2);
-%radius = boutonInfo(3);
-%brightness = boutonInfo(6);
+% This function draws a circle, its center, radius and brightness being
+% specified in the inputs. As the brightness varies for the time series
+% model, the function operates differently in this case (retrieval of the
+% relevant brightness).
 
 switch nargin 
     case 4

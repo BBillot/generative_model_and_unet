@@ -8,11 +8,13 @@
 width = 256;                 % Set Width of the image (integer)
 height = 256;                % Set Height (integer)
 negative_image = 0;          % 0=white axons on black background, 1=black axons on white background (boolean)
+maxIntensity = 255;          % decide the maximum pixel value
 
 % Parameters for time-series images
-NbImages = 6;                % Set numbers of images per time series (integer)
-rowshift = 50;                % Maximum row shift between images of the same time serie, 1=no shift (integer).
-colshift = 50;                % Maximum column shift between images of the same time serie, 1=no shift (integer).
+NbImages = 3;                % Set numbers of images per time series (integer)
+rowshift = 20;               % Maximum row shift between images of the same time serie, 1=no shift (integer).
+colshift = 20;               % Maximum column shift between images of the same time serie, 1=no shift (integer).
+probBoutInFirstImage = 0;  % Probability of a bouton to appear in the first image (real number between 0 and 1).
 
 % Set the different sources of noise
 sigma_noise_min = 10;        % Set min gaussian white noise level (integer)
@@ -31,7 +33,7 @@ conformity = 0.99;           % Set how straight the axon is (real number between
 MinThickness = 1.5;          % Set Min thickness of vessels (real number)
 MaxThickness = 3;            % Set Max thickness of vessels (real number)
 MinGapSize = 0;              % Set gap size (positive integer)
-MaxGapSize = 6;              % if you don't want any gap set both to 0 (positive integer)
+MaxGapSize = 4;              % if you don't want any gap set both to 0 (positive integer)
 
 % Construction of axons
 StepSize = 2;                % distance between each controlPoints. (real number)
@@ -75,10 +77,12 @@ sigma_noise_circle = 1.3;    % Set white noise whithin a circle (real number)
 AxonParameters(1).width = width;
 AxonParameters(1).height = height;
 AxonParameters(1).negative_image = negative_image;
+AxonParameters(1).maxIntensity = maxIntensity;
 
 AxonParameters(1).NbImages = NbImages;
 AxonParameters(1).rowshift = rowshift;
-AxonParameters(1).colshift =colshift;
+AxonParameters(1).colshift = colshift;
+AxonParameters(1).probBoutonInFirstImage = probBoutInFirstImage;
 
 AxonParameters(1).sigma_noise_min = sigma_noise_min;
 AxonParameters(1).sigma_noise_max = sigma_noise_max;

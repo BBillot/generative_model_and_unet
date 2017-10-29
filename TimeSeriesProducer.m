@@ -69,8 +69,8 @@ ax = images_gaps_filled(:,:,:,1);
 bo = bouton_masks(:,:,:,1);
 
 figure;
-Plotcols = 3; % This is kind of set arbitrarily 
-Plotrows = ceil(size(im,3)/Plotcols); % Relative to # of peas 
+Plotcols = 3; 
+Plotrows = ceil(size(im,3)/Plotcols);
 for i=1:size(im,3)
     subplot(Plotrows,Plotcols,i);
     imagesc(im(:,:,i));
