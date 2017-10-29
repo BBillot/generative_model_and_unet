@@ -137,7 +137,7 @@ while restart==0
             
             %gets the distance to the GTPoints of the pixels belonging to the
             %spline
-            [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer)] = PixDistanceToAxon...
+            [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer)] = PixDistanceToAxon2...
                 (width,height,AxonsGTPoints(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
                 thickness(pointer+1),MinGapSize,MaxGapSize,...
                 variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
@@ -188,7 +188,7 @@ while restart==0
                 variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
                     (variations(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod);
                 
-                [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer)] = PixDistanceToAxon(width,height,...
+                [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer)] = PixDistanceToAxon2(width,height,...
                     AxonsGTPoints(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),thickness(pointer+1),...
                     MinGapSize,MaxGapSize,variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
                 
@@ -618,201 +618,6 @@ switch profileType
 end
 
 end
-
-function [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize] = PixDistanceToAxon...
-    (width,height,AxonGTPointsWithoutGap,thickness,MinGapSize,MaxGapSize,variations)
-
-% This function finds the closest spline point for all the pixel in the
-% image by calculating the distance between every pixel and every spline
-% point. This returns a matrix (BranchDistWithGap) for which each pixel
-% value is the distance to the closest GTPoint. A pixel is said to belong
-% to an axon if its distance is below a given threshold. If a pixel is not
-% part of an axon, its distance is set to +infinity.
-
-% We also record to which AxonGTPoint a pixel has been associated. That way
-% we can associate each pixel belonging to the branch to a variation
-% coefficient. This coefficient will be used to calculate the pixel's
-% intensity. So the function returns BranchVariations, describing the value
-% of this coefficient for each point belonging to the axon.
-
-% We also want to introduce gaps in each branch. This is done by erasing
-% several GTPoints. The number of erased points is randomly picked. We have
-% to deal with the fact that this gap can occur at the start, the middle,
-% or the end of a branch.
-% As we want use the distance matrix as a way to check is axons cross or
-% not, we need to return a matrix without any gap (otherwise that would
-% mean that axons could cross each other at the location of gaps). That is
-% why we return two matrices containing distances: BranchDistWithoutGap and
-% BranchDistWithGap.
-
-NVesselCentrelinePoints = size(AxonGTPointsWithoutGap,2);
-indicePoint = randi(size(AxonGTPointsWithoutGap,2)); % picks the gap middle point
-GapSize = randi([MinGapSize,MaxGapSize]);
-Case = 0;
-BranchDistWithoutGap = Inf*ones(width,height);  % Create a vessel dist with "inf"
-BranchDistWithGap = Inf*ones(width,height);
-BranchVariations = Inf(width,height);
-[X,Y] = meshgrid(1:width,1:height);
-
-if GapSize>0
-    if indicePoint>GapSize && indicePoint<NVesselCentrelinePoints-GapSize
-        Case = 1; %gap in the middle
-    elseif indicePoint<=GapSize
-        Case = 2; %the axon starts by a gap
-    elseif indicePoint>=NVesselCentrelinePoints-GapSize
-        Case = 3; %the axon ends by a gap
-    end
-end
-
-switch(Case)
-    
-    case 0 %no gap
-        % For each point on vessel
-        for n = 1:NVesselCentrelinePoints
-            
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n)); %gets distance between a GT point and all the pixels
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i)) %checks if the distance if inferior to smallest distance calculated yet
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %in the corresponding pixel value is set to that distance
-                        BranchVariations(thisRow,thisCol) = variations(n); %and the correpsonding multiplicative coef is also inserted
-                    end
-                end
-            end
-        end
-        BranchDistWithGap = BranchDistWithoutGap; %as there is no gap the two matrices are the same
-        BranchVariationsWithoutGap = BranchVariations;
-        
-    case 1 %gap in the middle
-        %first part of the axon
-        for n=1:indicePoint-GapSize-1
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n)); %gets distance between a GTPoint and all the pixels
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the points whose distance is inferior to thickness
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i)) %checks if the distance if inferior to smallest distance calculated yet
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %if minimum then
-                        BranchVariations(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        %last part of the axon
-        for n=indicePoint+GapSize+1:NVesselCentrelinePoints
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness);
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a;
-                        BranchVariations(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        BranchDistWithGap = BranchDistWithoutGap; %as there is no gap in these parts the two matrices are the same up to this point
-        BranchVariationsWithoutGap = BranchVariations;
-        % but now there's a difference for the middle part (ie where the gap is) so we
-        % calculate the distance only for the axon without gap
-        for n=indicePoint-GapSize:indicePoint+GapSize
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %distance
-                        BranchVariationsWithoutGap(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        
-    case 2 %the axon starts by a gap
-        for n = indicePoint+GapSize+1:NVesselCentrelinePoints %last part of the axon (without gap)
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %distance
-                        BranchVariations(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        BranchDistWithGap = BranchDistWithoutGap; %as there is no gap in this part the two matrices are the same up to this point
-        BranchVariationsWithoutGap = BranchVariations;
-        for n = 1:indicePoint+GapSize %gap part
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a = min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %distance
-                        BranchVariationsWithoutGap(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        
-    case 3 %the axon ends by a gap
-        %first part
-        for n = 1:indicePoint-GapSize-1
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a=min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %distance
-                        BranchVariations(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-        BranchDistWithGap = BranchDistWithoutGap;
-        BranchVariationsWithoutGap = BranchVariations;
-        for n = indicePoint+GapSize:NVesselCentrelinePoints %last part with gap
-            DistWithoutGap = distE(X,Y,AxonGTPointsWithoutGap(:,n));
-            IndicesInImageWithoutGap = find(DistWithoutGap<thickness); %gets the indices of the closest points
-            if ~isempty(IndicesInImageWithoutGap)
-                for i = 1:length(IndicesInImageWithoutGap)
-                    thisRow = Y(IndicesInImageWithoutGap(i));
-                    thisCol = X(IndicesInImageWithoutGap(i));
-                    a=min(BranchDistWithoutGap(thisRow,thisCol),DistWithoutGap(IndicesInImageWithoutGap(i)));
-                    if a==DistWithoutGap(IndicesInImageWithoutGap(i))
-                        BranchDistWithoutGap(thisRow,thisCol) = a; %distance
-                        BranchVariationsWithoutGap(thisRow,thisCol) = variations(n);
-                    end
-                end
-            end
-        end
-end
-
-end
-
-
 
 function Patch = noise (Patch,sigmawn,lambda,height,width)
 
