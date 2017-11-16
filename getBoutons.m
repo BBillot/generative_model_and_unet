@@ -1,5 +1,7 @@
-function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBouton,MaxNbBouton,...
-    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, NbImages,probBoutonInFirstImage)
+function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints,InfoGTPoints,MinNbBouton,MaxNbBouton,...
+    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, NbImages,probBoutonInFirstImage, ...
+    rowshift, colshift, finalHeight, finalWidth)
+
 %, MinBouRadius,MaxBouRadius)
 
 % This function takes an image with axons as input and returns the same
@@ -30,23 +32,22 @@ switch nargin
         end
         BoutonSegmentation = logical(BoutonSegmentation);
         
-    case 12
-        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages,probBoutonInFirstImage);
+    case 17
+        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages,probBoutonInFirstImage,...
+            rowshift, colshift, finalHeight, finalWidth, InfoGTPoints);
         BoutonSegmentation = zeros(height,width,NbImages);
-        AxonsSeries = repmat(AxonsPatch,[1,1,NbImages]);
         for image=1:NbImages
             for bou=1:NBou
                 if(image==boutonsInfo{bou,3} || (boutonsInfo{bou,3}<image && boutonsInfo{bou,3}+boutonsInfo{bou,4}>image))
                     %draw a bouton
                     [boutonDist,boutonSegm,ordInf,ordSup,absInf,absSup] = drawBoutons(boutonsInfo(bou,:),BouSigma,height,width,image);
                     % add it to the patch
-                    AxonsSeries(ordInf:ordSup,absInf:absSup,image) = max(AxonsSeries(ordInf:ordSup,absInf:absSup,image),boutonDist); %puts back the bouton in the image
+                    AxonsPatch(ordInf:ordSup,absInf:absSup,image) = max(AxonsPatch(ordInf:ordSup,absInf:absSup,image),boutonDist); %puts back the bouton in the image
                     %BoutonSegmentation(ordInf:ordSup,absInf:absSup,image) = bou*max(BoutonSegmentation(ordInf:ordSup,absInf:absSup,image),boutonSegm); %updates the BoutonSegmentation mask
                     BoutonSegmentation(ordInf:ordSup,absInf:absSup,image) = max(BoutonSegmentation(ordInf:ordSup,absInf:absSup,image),boutonSegm); %updates the BoutonSegmentation mask
                 end
             end
         end
-        AxonsPatch = AxonsSeries;
         
 end
 

@@ -1,5 +1,5 @@
-function [finalAxonsSeries,finalAxonsPatchWithoutGap,finalAxonSegmentation,finalBoutonSegmentation] = postprocess(...
-    AxonsSeries,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
+function [finalAxonsSeries,finalAxonSegmentation,finalBoutonSegmentation] = postprocess...
+    (AxonsSeries,AxonSegmentation,BoutonSegmentation,...
     rowshift,colshift,finalHeight,finalWidth,NbImages,negative_image,maxIntensity)
 
 % This function first crops differently all the images stored in the 3D 
@@ -11,8 +11,8 @@ function [finalAxonsSeries,finalAxonsPatchWithoutGap,finalAxonSegmentation,final
 % and 255. This also where the negative images are obtained if the user has
 % specified it in the parameters.
 
+
 finalAxonsSeries = zeros(finalHeight,finalWidth,NbImages);
-finalAxonsPatchWithoutGap = zeros(finalHeight,finalWidth,NbImages);
 finalAxonSegmentation = zeros(finalHeight,finalWidth,NbImages);
 finalBoutonSegmentation = zeros(finalHeight,finalWidth,NbImages);
 
@@ -22,9 +22,6 @@ for im=1:NbImages
     colstart = randi([1,colshift]);
     finalAxonsSeries(:,:,im) =  AxonsSeries(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
     finalAxonsSeries(:,:,im) = floor(finalAxonsSeries(:,:,im)*maxIntensity/max(max(finalAxonsSeries(:,:,im))));
-    finalAxonsPatchWithoutGap(:,:,im) = AxonsPatchWithoutGap(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1);
-    finalAxonsPatchWithoutGap(finalAxonsPatchWithoutGap<0) = 0;
-    finalAxonsPatchWithoutGap(:,:,im) = floor(finalAxonsPatchWithoutGap(:,:,im)*maxIntensity/max(max(finalAxonsPatchWithoutGap(:,:,im))));
     finalAxonSegmentation(:,:,im) = AxonSegmentation(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1);
     finalBoutonSegmentation(:,:,im) = BoutonSegmentation(rowstart:rowstart+finalHeight-1,colstart:colstart+finalWidth-1,im);
 end
@@ -34,7 +31,6 @@ finalBoutonSegmentation = maxIntensity*finalBoutonSegmentation;
 % take the negative of image if specified
 if negative_image
     finalAxonsSeries = maxIntensity*ones(width,height)-finalAxonsSeries;
-    finalAxonsPatchWithoutGap = maxIntensity*ones(width,height)-finalAxonsPatchWithoutGap;
 end
 
 end

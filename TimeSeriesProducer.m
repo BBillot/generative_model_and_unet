@@ -39,10 +39,10 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,...
+        %rng(i)
+        [Patch,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,...
             XStart,YStart,XEnd,YEnd] = getSeries(parameters);
         images(:,:,:,i) = Patch;
-        images_gaps_filled(:,:,:,i) = PatchWithoutGap;
         axon_masks(:,:,:,i) = AxonSegmentation;
         bouton_masks(:,:,:,i) = BoutonSegmentation;
         if mod(i,50)==0
@@ -56,16 +56,15 @@ for chunk=1:Nchunks
 %     save(path,'images','-v7.3')
 %     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
 %     save(path,'axon_masks','-v7.3')
-%     path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'images_gaps_filled','-v7.3')
 %     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
 %     save(path,'bouton_masks','-v7.3')
     
 end
 
+toc
+
 im = images(:,:,:,1);
-ma = axon_masks(:,:,:,1);
-ax = images_gaps_filled(:,:,:,1);
+ma = axon_masks(:,:,:,1); 
 bo = bouton_masks(:,:,:,1);
 
 figure;
@@ -78,5 +77,3 @@ for i=1:size(im,3)
     colormap(gray);
     title(strcat('image ',num2str(i)));
 end;
-
-toc

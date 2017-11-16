@@ -11,7 +11,8 @@ switch nargin
         radius = boutonInfo{2};
         brightness = boutonInfo{5};
     case 5 
-        center = boutonInfo{1};
+        centers = boutonInfo{1};
+        center = centers(:,:,image);
         radius = boutonInfo{2};
         brightness = boutonInfo{5}(image-boutonInfo{3}+1);  
 end

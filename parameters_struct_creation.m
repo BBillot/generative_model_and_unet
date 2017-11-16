@@ -11,10 +11,12 @@ negative_image = 0;          % 0=white axons on black background, 1=black axons 
 maxIntensity = 255;          % decide the maximum pixel value
 
 % Parameters for time-series images
-NbImages = 3;                % Set numbers of images per time series (integer)
+NbImages = 6;                % Set numbers of images per time series (integer)
 rowshift = 20;               % Maximum row shift between images of the same time serie, 1=no shift (integer).
 colshift = 20;               % Maximum column shift between images of the same time serie, 1=no shift (integer).
-probBoutInFirstImage = 0;  % Probability of a bouton to appear in the first image (real number between 0 and 1).
+minRotAngle = 1;             % Minimum rotation angle between images
+maxRotAngle = 4;             % Maximum rotation angle between images
+probBoutInFirstImage = 0.3;  % Probability of a bouton to appear in the first image (real number between 0 and 1).
 
 % Set the different sources of noise
 sigma_noise_min = 10;        % Set min gaussian white noise level (integer)
@@ -67,8 +69,8 @@ MaxNbCircles = 9;            % Set the max number of circles in the image (integ
 MinRadius = 3;               % Minimum radius for a cell (integer)
 MaxRadius = 20;              % Maximum radius for a cell (integer) 
 CircleBrightness = 1;        % Set if we want bright cells (0/1)
-MinBrightnessCircles = 20;   % Minimum level of cell intensity (fine tuning) (integer between 0 and 100)
-MaxBrightnessCircles = 30;   % Maximum level of cell intensity (fine tuning) (integer between 0 and 100)
+MinBrightnessCircles = 10;   % Minimum level of cell intensity (fine tuning) (integer between 0 and 100)
+MaxBrightnessCircles = 20;   % Maximum level of cell intensity (fine tuning) (integer between 0 and 100)
 sigma_noise_circle = 1.3;    % Set white noise whithin a circle (real number)
 
 
@@ -82,6 +84,8 @@ AxonParameters(1).maxIntensity = maxIntensity;
 AxonParameters(1).NbImages = NbImages;
 AxonParameters(1).rowshift = rowshift;
 AxonParameters(1).colshift = colshift;
+AxonParameters(1).minRotAngle = minRotAngle;
+AxonParameters(1).maxRotAngle = maxRotAngle;
 AxonParameters(1).probBoutonInFirstImage = probBoutInFirstImage;
 
 AxonParameters(1).sigma_noise_min = sigma_noise_min;
