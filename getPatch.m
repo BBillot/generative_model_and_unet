@@ -244,6 +244,10 @@ AxonSegmentation = (AxonsDistWithoutGap <SegmentationThreshold);
 [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, MinNbBouton, MaxNbBouton,...
     MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness);
     % ,MinBouRadius,MaxBouRadius)
+    
+
+
+
 
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 
