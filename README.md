@@ -37,7 +37,7 @@ IMAGES EXAMPLES
 
 single image: 
 
-![alt text](https://github.com/BBillot/generative_model_and_unet/single_image.png)
+![Alt text](single_image.png?raw=true "example of image obtained with ImageProducer")
 
 ----------------
 
