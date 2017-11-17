@@ -10,26 +10,34 @@ This project attempts to perform axon segmentation of cortical images by using a
 
 MODEL:
 
--By running ImageProducer.m one would produce 4 3D-matrices. The first one contains 2D independent images, the second provides their corresponding binary segmentation, the 3rd one returns the same images cleaned from all sources of noise, and the 4th one gives back the bouton segmentation.
+- By running ImageProducer.m one would produce 4 3D-matrices. The first one contains 2D independent images, the second provides their corresponding binary segmentation, the 3rd one returns the same images cleaned from all sources of noise, and the 4th one gives back the bouton segmentation.
 
--SeriesProducer.m uses the same algorithm than ImageProducer.m to produce time-serie images where slight variations can be observed between images (apparition/disapearance of synaptic boutons, background noise, shiftings/rotations)
+- SeriesProducer.m uses the same algorithm than ImageProducer.m to produce time-serie images where slight variations can be observed between images (apparition/disapearance of synaptic boutons, background noise, shiftings/rotations)
 
--To run Imageproducer or SeriesProducer you have to create a json file with the parameters_struct_creation.m script. 
+- To run Imageproducer or SeriesProducer you have to create a json file with the parameters_struct_creation.m script. 
 
-One example of json file is also provided (parameters_64x64_images.json)
+- One example of json file is also provided (parameters_64x64_images.json.)
 
 ----------------
 
 CNN FOR SEGMENTATION:
 
--The main script is unets.py
+- The main script is unets.py
 
--It uses the functions stored in func.py
+- It uses the functions stored in func.py
 
--Resume_seg.py is provided in order to resume a paused training (very useful for pre-training a network)
+- Resume_seg.py is provided in order to resume a paused training (very useful for pre-training a network)
 
--The last file testing-seg.y allows to only perform testing of an existing network.
+- The last file testing-seg.y allows to only perform testing of an existing network.
 
+
+----------------
+
+IMAGES EXAMPLES
+
+single image: 
+
+![alt text](https://github.com/BBillot/generative_model_and_unet/single_image.png)
 
 ----------------
 
