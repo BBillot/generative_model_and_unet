@@ -16,7 +16,7 @@ MODEL:
 
 - To run Imageproducer or SeriesProducer you have to create a json file with the parameters_struct_creation.m script. 
 
-- One example of json file is also provided (parameters_64x64_images.json.)
+- One example of json file is also provided (parameters_256x256_images.json.)
 
 ----------------
 
@@ -30,14 +30,26 @@ CNN FOR SEGMENTATION:
 
 - The last file testing-seg.y allows to only perform testing of an existing network.
 
-
 ----------------
 
 IMAGES EXAMPLES
 
-single image: 
+example of an image obtained with ImageProducer: 
 
 ![Alt text](single_image.png?raw=true "example of image obtained with ImageProducer")
+
+example of a time-serie obtained with TimeSeriesProducer:
+
+![Alt text](time-serie-images.png?raw=true "example of a time-serie obtained with TimeSeriesProducer")
+
+example of the obtained segmentation:
+
+![Alt text](predicted.png?raw=true "example of the obtained segmentation")
+
+a) original image
+b) corresponding Ground Truth segmentation
+c) segmentation obtained after having trained the network with real images
+d) segmentation obtained after having trained the network with generated images
 
 ----------------
 
