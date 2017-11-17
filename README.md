@@ -10,9 +10,11 @@ This project attempts to perform axon segmentation of cortical images by using a
 
 MODEL:
 
-    -the main script is ImageProducer.m and all the functions it uses are stored in the getPatch.m file
+    -By running ImageProducer.m one would produce 4 3D-matrices. The first one contains 2D independent images, the second provides their corresponding binary segmentation, the 3rd one returns the same images cleaned from all sources of noise, and the 4th one gives back the bouton segmentation.
 
-    -to run Imageproducer you have to create a json file with the parameters_struct_creation.m
+    - SeriesProducer.m uses the same algorithm than ImageProducer.m to produce time-serie images where slight variations can be observed between images (apparition/disapearance of synaptic boutons, background noise, shiftings/rotations)
+
+    -to run Imageproducer or SeriesProducer you have to create a json file with the parameters_struct_creation.m script. 
 
     -one example of json file is also provided (parameters_64x64_images.json)
 
