@@ -29,4 +29,12 @@ CNN FOR SEGMENTATION:
 -Resume_seg.py is provided in order to resume a paused training (very useful for pre-training a network)
 
 -The last file testing-seg.y allows to only perform testing of an existing network.
-    
+
+
+----------------
+
+FOR MORE INFORMATION:
+
+The report I wrote for my MSc thesis explains in more details the model and how it was validated by training a UNet-like Neural Network to perform segmentation of real images. A list of the model's parameters is also provided along with explanations.
+
+If you have any question you can contact me at : benjamin.billot16@imperial.ac.ic    
