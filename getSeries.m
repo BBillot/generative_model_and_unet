@@ -262,8 +262,8 @@ end
 %modifies the AxonPatch matrix to add boutons, and creates the bouton
 %segmentation
 [AxonsSeries,BoutonSegmentation] = getBoutons(rotatedCopies, rotatedAxonsGTPointsWithGap, MinNbBouton, MaxNbBouton,...
-    MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, NbImages,probBoutonInFirstImage,...
-    rowshift, colshift, finalHeight, finalWidth, InfoGTPointsWithGap);
+    MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, InfoGTPointsWithGap, NbImages,probBoutonInFirstImage,...
+    rowshift, colshift, finalHeight, finalWidth);
 
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 

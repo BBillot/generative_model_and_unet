@@ -26,7 +26,7 @@ switch nargin
         Points = zeros(1,NBou);
         for i=1:NBou
             Point = [-1;-1];
-            while(Point(1)<rowshift || Point(1)>rowshift+finalWidth || Point(2)<colshift || Point(2)>colshift+finalHeight)
+            while(Point(1)<rowshift | Point(1)>rowshift+finalWidth | Point(2)<colshift | Point(2)>colshift+finalHeight)
                 Point_idx = randi(length(AxonsGTPoints));
                 Point = [AxonsGTPoints(1,Point_idx,1);AxonsGTPoints(2,Point_idx,1)];
             end

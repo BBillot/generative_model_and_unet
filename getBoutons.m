@@ -33,8 +33,8 @@ switch nargin
         BoutonSegmentation = logical(BoutonSegmentation);
         
     case 17
-        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages,probBoutonInFirstImage,...
-            rowshift, colshift, finalHeight, finalWidth, InfoGTPoints);
+        boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,NbImages,probBoutonInFirstImage,...
+            rowshift, colshift, finalHeight, finalWidth);
         BoutonSegmentation = zeros(height,width,NbImages);
         for image=1:NbImages
             for bou=1:NBou
