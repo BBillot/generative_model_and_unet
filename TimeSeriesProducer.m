@@ -39,12 +39,11 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        %rng(i)
-        [Patch,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,...
+        [TimeSeries,AxonsSegmentation,BoutonsSegmentation,AxonsGTPoints,GapSize,...
             XStart,YStart,XEnd,YEnd] = getSeries(parameters);
-        images(:,:,:,i) = Patch;
-        axon_masks(:,:,:,i) = AxonSegmentation;
-        bouton_masks(:,:,:,i) = BoutonSegmentation;
+        images(:,:,:,i) = TimeSeries;
+        axon_masks(:,:,:,i) = AxonsSegmentation;
+        bouton_masks(:,:,:,i) = BoutonsSegmentation;
         if mod(i,50)==0
             disp(i);
         end 
@@ -63,16 +62,20 @@ end
 
 toc
 
-im = images(:,:,:,1);
-ma = axon_masks(:,:,:,1); 
-bo = bouton_masks(:,:,:,1);
+im = images(:,:,:,1);        %first time series
+ma = axon_masks(:,:,:,1);    %corresponding axon segmentation maps
+bo = bouton_masks(:,:,:,1);  %corresponding bouton segmentation maps
+
+% plot the time series. change the number of columns and the type of image
+% you want to plot (im, ma, bo).
+type = im;
+Plotcols = 3; 
 
 figure;
-Plotcols = 3; 
-Plotrows = ceil(size(im,3)/Plotcols);
-for i=1:size(im,3)
+Plotrows = ceil(size(type,3)/Plotcols);
+for i=1:size(type,3)
     subplot(Plotrows,Plotcols,i);
-    imagesc(im(:,:,i));
+    imagesc(type(:,:,i));
     axis off;
     colormap(gray);
     title(strcat('image ',num2str(i)));

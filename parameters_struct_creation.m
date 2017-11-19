@@ -14,7 +14,6 @@ maxIntensity = 255;          % decide the maximum pixel value
 NbImages = 6;                % Set numbers of images per time series (integer)
 rowshift = 20;               % Maximum row shift between images of the same time serie, 1=no shift (integer).
 colshift = 20;               % Maximum column shift between images of the same time serie, 1=no shift (integer).
-minRotAngle = 1;             % Minimum rotation angle between images
 maxRotAngle = 4;             % Maximum rotation angle between images
 probBoutInFirstImage = 0.3;  % Probability of a bouton to appear in the first image (real number between 0 and 1).
 
@@ -84,7 +83,6 @@ AxonParameters(1).maxIntensity = maxIntensity;
 AxonParameters(1).NbImages = NbImages;
 AxonParameters(1).rowshift = rowshift;
 AxonParameters(1).colshift = colshift;
-AxonParameters(1).minRotAngle = minRotAngle;
 AxonParameters(1).maxRotAngle = maxRotAngle;
 AxonParameters(1).probBoutonInFirstImage = probBoutInFirstImage;
 

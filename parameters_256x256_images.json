@@ -6,7 +6,6 @@
 	"NbImages": 6,
 	"rowshift": 20,
 	"colshift": 20,
-	"minRotAngle": 1,
 	"maxRotAngle": 4,
 	"probBoutonInFirstImage": 0.3,
 	"sigma_noise_min": 10,
