@@ -39,8 +39,9 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        [TimeSeries,AxonsSegmentation,BoutonsSegmentation,AxonsGTPoints,GapSize,...
-            XStart,YStart,XEnd,YEnd] = getSeries(parameters);
+        [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
+            rotatedAxonsGTPointsWithoutGap,rotatedAxonsGTPointsWithGap,...
+            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
         bouton_masks(:,:,:,i) = BoutonsSegmentation;
@@ -80,5 +81,3 @@ for i=1:size(type,3)
     colormap(gray);
     title(strcat('image ',num2str(i)));
 end;
-
-yo_man
