@@ -40,11 +40,16 @@ for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
-            rotatedAxonsGTPointsWithoutGap,rotatedAxonsGTPointsWithGap,...
+            rotatedGTPointsWithoutGap,rotatedGTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
         bouton_masks(:,:,:,i) = BoutonsSegmentation;
+        data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
+        data(i).GTPointsWithGap = rotatedGTPointsWithGap;
+        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+        data(i).GapSizes = GapSize;
         if mod(i,50)==0
             disp(i);
         end 

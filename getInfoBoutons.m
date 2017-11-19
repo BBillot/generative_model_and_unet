@@ -1,5 +1,5 @@
-function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness,NbImages,...
-    probBoutonInFirstImage, rowshift, colshift, finalHeight, finalWidth, InfoGTPoints)
+function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness, InfoGTPoints,...
+    NbImages, probBoutonInFirstImage, rowshift, colshift, finalHeight, finalWidth)
 
 % This function generates the parameters necessary to draw circles
 % representing synaptic boutons: center, radius, and brightness. It
@@ -14,12 +14,12 @@ boutonsInfo = cell(NBou,5);
 
 
 switch nargin
-    case 5
+    case 6
         Points = randi(length(AxonsGTPoints),[1,NBou]);
         %center of boutons
         boutonsInfo(:,1) = mat2cell(round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])',ones(1,NBou));
         %radius
-        boutonsInfo(:,2) = num2cell((floor(thickness(AxonsGTPoints(5,Points)))+1)');
+        boutonsInfo(:,2) = num2cell((floor(thickness(InfoGTPoints(3,Points)))+1)');
         moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
         boutonsInfo(:,5) = num2cell(moy);
     case 12

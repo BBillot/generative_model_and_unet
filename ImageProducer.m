@@ -39,12 +39,18 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,AxonsGTPoints,GapSize,...
-            XStart,YStart,XEnd,YEnd] = getPatch(parameters);
+        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
+            GTPointsWithoutGap,GTPointsWithGap,...
+            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
         images(:,:,i) = Patch;
         images_gaps_filled(:,:,i) = PatchWithoutGap;
         axon_masks(:,:,i) = AxonSegmentation;
         bouton_masks(:,:,i) = BoutonSegmentation;
+        data(i).GTPointsWithoutGap = GTPointsWithoutGap;
+        data(i).GTPointsWithGap = GTPointsWithGap;
+        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+        data(i).GapSizes = GapSize;
         if mod(i,50)==0
             disp(i);
         end 

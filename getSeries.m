@@ -264,7 +264,6 @@ end
 [AxonsSeries,BoutonSegmentation] = getBoutons(rotatedCopies, rotatedAxonsGTPointsWithGap, MinNbBouton, MaxNbBouton,...
     MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, NbImages,probBoutonInFirstImage,...
     rowshift, colshift, finalHeight, finalWidth, InfoGTPointsWithGap);
-% ,MinBouRadius,MaxBouRadius)
 
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 
