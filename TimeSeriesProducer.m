@@ -80,3 +80,5 @@ for i=1:size(type,3)
     colormap(gray);
     title(strcat('image ',num2str(i)));
 end;
+
+yo
