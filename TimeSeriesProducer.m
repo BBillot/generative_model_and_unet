@@ -81,4 +81,4 @@ for i=1:size(type,3)
     title(strcat('image ',num2str(i)));
 end;
 
-yo
+yo_man
