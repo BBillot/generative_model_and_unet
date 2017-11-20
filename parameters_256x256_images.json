@@ -7,7 +7,7 @@
 	"rowshift": 20,
 	"colshift": 20,
 	"maxRotAngle": 4,
-	"probBoutonInFirstImage": 0.3,
+	"probBoutonInFirstImage": 0.4,
 	"sigma_noise_min": 10,
 	"sigma_noise_max": 10,
 	"lambdaMin": 7,

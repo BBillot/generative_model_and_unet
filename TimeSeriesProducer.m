@@ -7,8 +7,8 @@
 % (XYStart) and the last one ([XEnd,YEnd]), and the sizes of the gaps in
 % each branch (GapSize).
 
-% The resulting images ('images.mat'), the axon segmentations 
-% ('axon_masks.mat') and the bouton segmentations ('bouton_masks.mat') are 
+% The resulting images ('images.mat'), the axon segmentations
+% ('axon_masks.mat') and the bouton segmentations ('bouton_masks.mat') are
 % saved in separate files.
 
 % Depending on size and the amount of data that one wishes to generate,
@@ -39,6 +39,7 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
+        rng(7);
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
             rotatedGTPointsWithoutGap,rotatedGTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
@@ -50,33 +51,32 @@ for chunk=1:Nchunks
         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
         data(i).GapSizes = GapSize;
-        if mod(i,50)==0
+        if mod(i,5)==0
             disp(i);
-        end 
+        end
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
-%     disp('saving data');
-%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'images','-v7.3')
-%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'axon_masks','-v7.3')
-%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'bouton_masks','-v7.3')
+    %     disp('saving data');
+    %     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'images','-v7.3')
+    %     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'axon_masks','-v7.3')
+    %     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'bouton_masks','-v7.3')
     
 end
 
 toc
 
-im = images(:,:,:,1);        %first time series
-ma = axon_masks(:,:,:,1);    %corresponding axon segmentation maps
-bo = bouton_masks(:,:,:,1);  %corresponding bouton segmentation maps
+im = images(:,:,:,i);        %first time series
+ma = axon_masks(:,:,:,i);    %corresponding axon segmentation maps
+bo = bouton_masks(:,:,:,i);  %corresponding bouton segmentation maps
 
 % plot the time series. change the number of columns and the type of image
 % you want to plot (im, ma, bo).
 type = im;
-Plotcols = 3; 
-
+Plotcols = 3;
 figure;
 Plotrows = ceil(size(type,3)/Plotcols);
 for i=1:size(type,3)

@@ -7,16 +7,16 @@ function imageOfApparition = selection(NbImage,NBou,probBoutonInFirstImage)
 % the total number of images.
 
 a = rand(NBou,1);
-firstImage = 1-probBoutonInFirstImage;
-b = firstImage/NbImage:firstImage/NbImage:firstImage;
-imageOfApparition = zeros(NBou,2);
+complement = 1-probBoutonInFirstImage;
+b = complement/NbImage:complement/NbImage:complement;
+imageOfApparition = zeros(NBou,2); %first row is the image of apparition, second is the duration of a bouton
 
-for i=1:NBou
-    if a(i)>=firstImage
+for i=2:NBou
+    if a(i)>=complement %if a(i) above complement the ith bouton appears in the 1st image
         imageOfApparition(i,1) = 1;
-    else
+    else %if not, then we check in which part of b a(i) has fallen
         for j=1:length(b)-1
-            if a(i)<b(j)
+            if a(i)<b(j) 
                 imageOfApparition(i,1) = j+1;
                 break
             end
