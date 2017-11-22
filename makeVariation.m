@@ -32,9 +32,14 @@ switch profileType
     case {'cosine'} %cosine variation of intensity along a branch
         NPeriods = randi([MinPeriod*100,MaxPeriod*100])/100;
         if startVariation<1, startVariation = startVariation*100; end
-        intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
-        MaxIntensity = max(intensities)/100;
-        MinIntensity = min(intensities)/100;
+        %intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
+        MaxIntensity = randi([min(round(startVariation)-1,MaxAxonIntensity-1),MaxAxonIntensity-1])/100;
+        MinIntensity = randi([MinAxonIntensity+1,max(round(startVariation)+1,MinAxonIntensity+1)])/100;
+        if MinIntensity >= MaxIntensity
+            intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
+            MaxIntensity = max(intensities)/100;
+            MinIntensity = min(intensities)/100;
+        end
         a = 0.5*(MaxIntensity+MinIntensity); b = 0.5*(MaxIntensity-MinIntensity);
         %real part is due to no infinite calculation accuracy that leads to complex number for acos(1)
         phi = real(acos((round(startVariation)/100-a)/b));
