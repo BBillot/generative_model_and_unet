@@ -39,7 +39,6 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        rng(7);
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
             rotatedGTPointsWithoutGap,rotatedGTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);

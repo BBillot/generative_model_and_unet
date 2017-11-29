@@ -22,7 +22,7 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 1;                             % number of images per chunk of data
+N = 20;                             % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
 json = 'parameters_256x256_images.json';   % name of the json file to load
 
@@ -38,11 +38,13 @@ parameters=loadjson(json);
 for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
-    for i=N:-1:1
+    for i=1:1:1
+        rng(16)
         [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
-        images(:,:,i) = Patch;
+         images(:,:,i) = Patch;
+         figure; imagesc(images(:,:,i)); colormap(gray); axis off;
         images_gaps_filled(:,:,i) = PatchWithoutGap;
         axon_masks(:,:,i) = AxonSegmentation;
         bouton_masks(:,:,i) = BoutonSegmentation;
@@ -69,9 +71,16 @@ for chunk=1:Nchunks
     
 end
 
-im = images(:,:,1);
-ma=axon_masks(:,:,1);
+% im = images(:,:,1);
+% ma=axon_masks(:,:,1);
 
-figure; imagesc(im); colormap(gray); axis off;
+% figure; imagesc(im); colormap(gray); axis off;
 
 toc
+
+%TODO :
+% -fix terminal branches, make them fuzzier
+% -minimum distance between boutons
+% -make that the bouton can't be on another axon
+% -include Anil's circles
+% -integrate the changes in the time series model

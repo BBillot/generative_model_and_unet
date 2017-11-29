@@ -89,7 +89,7 @@ while restart==0
     pointerAxon = 1;                                     % points to the start of the current axon in the GTPoints
     AxonsDistWithoutGap = Inf(height,width);             % distance to the AxonsGTPoints without taking gaps into account
     AxonsDistWithGap = Inf(height,width);                % distance to the AxonsGTPoints
-    AxonsVariations = Inf(height,width);                 % describes intensity variations along axons taking gaps into account
+    AxonsVariationsWithGap = Inf(height,width);                 % describes intensity variations along axons taking gaps into account
     AxonsVariationsWithoutGap = Inf(height,width);       % describes intensity variations but without gaps
     
     
@@ -118,9 +118,6 @@ while restart==0
                     end
                 end
             end
-            if z==1
-                XStart = Xstart; YStart = Ystart;
-            end
             xp = Xstart; yp = Ystart; ControlPoints = [xp;yp];
             AtTerminalState = 0;   %reinitialize value for testing
             while ~AtTerminalState
@@ -132,9 +129,7 @@ while restart==0
                 yp = min(yp,height); yp = max(yp,1);  %put yp at the border if it crossed it
                 ControlPoints = [ControlPoints,[xp;yp]]; %stacks the new points inside a matrix
             end
-            if z==1
-                XEnd = ControlPoints(1,end); YEnd = ControlPoints(2,end); %gets the last point of the first axon
-            end
+            
             %creates a spline going through all the ControlPoints
             AxonPoly = MakeAxonPoly(ControlPoints);
             
@@ -146,9 +141,8 @@ while restart==0
                 (randi([MinAxonIntensity,MaxAxonIntensity])/100,AxonProfile,NSplinePoints,MinAxonIntensity,...
                 MaxAxonIntensity,MinPeriod,MaxPeriod);
             
-            %gets the distance to the GTPoints of the pixels belonging to the
-            %spline
-            [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer),newAxonGTPoints,newVariations] = ...
+            %gets the distance to the GTPoints of the pixels belonging to the spline
+            [BranchDistWithoutGap,BranchDistWithGap,BranchVariationsWithoutGap,BranchVariationsWithGap,GapSize(1+pointer),newAxonGTPoints,newVariations] = ...
                 PixDistanceToAxon(width,height,AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
                 thickness(pointer+1),MinGapSize,MaxGapSize,variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
             
@@ -157,23 +151,21 @@ while restart==0
                 cross = 0;
             else ncross = ncross+1;
             end
-            if ncross>50, restart = 1; end
+            if ncross>60, disp('restarting drawing'); restart = 1; end
             if restart==1, break, end
         end
         if restart==1, break, end
         
-        % updates info about AxonsGTPointsWithoutGap
-        InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
-        
-        %updates the AxonsDisthWithGap and the checking matrices (AxonsDistWithoutGap) with the new branch
+        % updates the matrices with the new branch
         AxonsDistWithGap = min(AxonsDistWithGap,BranchDistWithGap);
         AxonsDistWithoutGap = min(AxonsDistWithoutGap,BranchDistWithoutGap);
-        AxonsVariations = min(AxonsVariations,BranchVariations);
+        AxonsVariationsWithGap = min(AxonsVariationsWithGap,BranchVariationsWithGap);
         AxonsVariationsWithoutGap = min(AxonsVariationsWithoutGap,BranchVariationsWithoutGap);
         
-        % updates the collection of GTPoints once the gaps have been applied
+        % updates info and AxonsGTPointsWithGap
         AxonsGTPointsWithGap = cat(2,AxonsGTPointsWithGap,newAxonGTPoints);
         variationsWithGap = cat(2,variationsWithGap,newVariations);
+        InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
         InfoGTPointsWithGap = cat(2,InfoGTPointsWithGap,[z*ones(1,size(newAxonGTPoints,2));ones(1,size(newAxonGTPoints,2));(pointer+1)*ones(1,size(newAxonGTPoints,2))]);
         
         pointer = pointer+1;
@@ -185,9 +177,12 @@ while restart==0
         for i=2:NBran(z)
             cross=1;
             while cross
-                s = randi([pointerAxon,pointerAxon+NSplinePoints*(i-1)]); %picks a starting point in the current axon
-                newStart = AxonsGTPointsWithoutGap(:,s);                        %gets its coordinates
-                xp = newStart(1); yp = newStart(2); ControlPoints = [xp;yp];
+                indicesCurrentAxon = InfoGTPointsWithGap(1,:)==z;
+                CurrentAxonGTPoints = AxonsGTPointsWithGap(:,indicesCurrentAxon);
+                CurrentAxonVariations = variationsWithGap(indicesCurrentAxon);
+                s = randi([1,size(CurrentAxonGTPoints,2)]);
+                ControlPoints = CurrentAxonGTPoints(:,s);
+                xp = ControlPoints(1); yp = ControlPoints(2);
                 AtTerminalState = 0;                                     %reinitialize value for testing
                 while ~AtTerminalState
                     v  = getValidDirection(v,conformity);                %gets new direction
@@ -198,19 +193,15 @@ while restart==0
                     ControlPoints = [ControlPoints,[xp;yp]];
                 end
                 
-                %creates a spline going through all the ControlPoints
                 AxonPoly = MakeAxonPoly(ControlPoints);
-                
-                %matrix containing the points of the spline
                 AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
                 
                 variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
-                    (variationsWithoutGap(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod);
+                    (CurrentAxonVariations(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod);
                 
-                [BranchDistWithoutGap,BranchDistWithGap,BranchVariations,BranchVariationsWithoutGap,GapSize(1+pointer),newAxonGTPoints,newVariations]...
-                    = PixDistanceToAxon(width,height,...
-                    AxonsGTPointsWithoutGap(1:2,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),thickness(pointer+1),...
-                    MinGapSize,MaxGapSize,variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
+                [BranchDistWithoutGap,BranchDistWithGap,BranchVariationsWithoutGap,BranchVariationsWithGap,GapSize(1+pointer),newAxonGTPoints, newVariations]...
+                    = PixDistanceToAxon(width,height,AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
+                    thickness(pointer+1),MinGapSize,MaxGapSize,variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
                 
                 % checks if the new branch crosses already existing branches
                 if crossingOK
@@ -218,26 +209,24 @@ while restart==0
                 else
                     % as branches obviously cross their mother branch, we need a special function that checks the crossing only at
                     % a given distance from the branching point
-                    cross=checkCrossings(AxonsDistWithoutGap,BranchDistWithoutGap,straightBranching*thickness(pointer+1),newStart);
+                    cross=checkCrossings(AxonsDistWithoutGap,BranchDistWithoutGap,straightBranching*thickness(pointer+1),ControlPoints(:,1));
                     if cross==1, ncross = ncross+1; end
                 end
-                if ncross>50, restart = 1; end
+                if ncross>60, disp('restarting drawing'); restart = 1; end
                 if restart==1, break, end
             end
             if restart==1, break, end
             
-            % updates info about AxonsGTPointsWithoutGap
-            InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
-            
             % updates the matrices with the new branch
             AxonsDistWithGap = min(AxonsDistWithGap,BranchDistWithGap);
             AxonsDistWithoutGap = min(AxonsDistWithoutGap,BranchDistWithoutGap);
-            AxonsVariations = min(AxonsVariations,BranchVariations);
+            AxonsVariationsWithGap = min(AxonsVariationsWithGap,BranchVariationsWithGap);
             AxonsVariationsWithoutGap = min(AxonsVariationsWithoutGap,BranchVariationsWithoutGap);
             
-            % updates the collection of GTPoints once the gaps have been applied
+            % updates info and AxonsGTPointsWithGap
             AxonsGTPointsWithGap = cat(2,AxonsGTPointsWithGap,newAxonGTPoints);
             variationsWithGap = cat(2,variationsWithGap,newVariations);
+            InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);i*ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
             InfoGTPointsWithGap = cat(2,InfoGTPointsWithGap,[z*ones(1,size(newAxonGTPoints,2));i*ones(1,size(newAxonGTPoints,2));(pointer+1)*ones(1,size(newAxonGTPoints,2))]);
             
             pointer = pointer+1;
@@ -249,21 +238,22 @@ while restart==0
     else restart = 1;
     end
 end
+disp(ncross);
 
 
 %%%%%%%%%%%%%%%% obtain rotated versions of the main image %%%%%%%%%%%%%%%%
 
 [rotatedCopies, rotatedSegmentations, rotatedAxonsGTPointsWithoutGap, rotatedAxonsGTPointsWithGap, width, height] = getRotatedIntensityMatrices...
-    (AxonsDistWithoutGap, AxonsDistWithGap, AxonsGTPointsWithoutGap, AxonsGTPointsWithGap, AxonsVariations,variationsWithoutGap,...
+    (AxonsDistWithoutGap, AxonsDistWithGap, AxonsGTPointsWithoutGap, AxonsGTPointsWithGap, AxonsVariationsWithGap,variationsWithoutGap,...
     variationsWithGap, width, height, NbImages, padding_thickness, thetas, SegmentationThreshold, sigma_noise_axon, sigma_spread);
 
 %%%%%%%%%%%%%%%%%% adding circles representing boutons %%%%%%%%%%%%%%%%%%%%
 
 %modifies the AxonPatch matrix to add boutons, and creates the bouton
 %segmentation
-[AxonsSeries,BoutonSegmentation] = getBoutons(rotatedCopies, rotatedAxonsGTPointsWithGap, MinNbBouton, MaxNbBouton,...
-    MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, InfoGTPointsWithGap, NbImages,probBoutonInFirstImage,...
-    rowshift, colshift, finalHeight, finalWidth);
+[AxonsSeries,BoutonSegmentation] = getBoutons(rotatedCopies, rotatedAxonsGTPointsWithGap, variationsWithGap, MinNbBouton, MaxNbBouton,...
+    MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, sigma_spread, sigma_noise_axon,...
+    InfoGTPointsWithGap, NbImages, probBoutonInFirstImage, rowshift, colshift, finalHeight, finalWidth);
 
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 
@@ -323,17 +313,6 @@ else
     end
     
 end
-
-end
-
-function [AxonAxisGT] = getAxonsGTPoints(AxonsPoly,npoints)
-
-% This function exctracts points from the spline
-
-tt = linspace(0,1,npoints);
-AxonAxisGT = fnval(AxonsPoly,tt); %find the value of the spline for all values of tt
-AxonPolyDer = fnder(AxonsPoly,1); % differentiates VesselPoly
-AxonDirGT = fnval(AxonPolyDer,tt); %find the values of the derivative at the spline points
 
 end
 
@@ -454,15 +433,6 @@ CircleBrightness = parameters(1).CircleBrightness;
 MinBrightnessCircles = parameters(1).MinBrightnessCircles;
 MaxBrightnessCircles = parameters(1).MaxBrightnessCircles;
 sigma_noise_circle = parameters(1).sigma_noise_circle;
-
-end
-
-function AxonPoly = MakeAxonPoly(ControlPoints)
-
-%creates a spline going trough all the ControlPoints
-
-t = linspace(0,1,size(ControlPoints,2));%vector going from 0 to 1 with n evenly spaced values (n=#column of ControlP)
-AxonPoly = csapi(t, ControlPoints); %csapi=spline, creates the spline
 
 end
 
