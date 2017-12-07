@@ -11,10 +11,10 @@ switch nargin
         radius = boutonInfo{3};
         brightness = boutonInfo{6};
     case 5 
-        centers = boutonInfo{1};
+        centers = boutonInfo{2};
         center = centers(:,:,image);
-        radius = boutonInfo{2};
-        brightness = boutonInfo{5}(image-boutonInfo{3}+1);  
+        radius = boutonInfo{3};
+        brightness = boutonInfo{6}(image-boutonInfo{4}+1);  
 end
 
 if (center(1)-radius>0 && center(1)+radius<=height && center(2)-radius>0 && center(2)+radius<=width) %middle

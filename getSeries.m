@@ -71,8 +71,8 @@ while restart==0
     thetamax = max(abs(thetas));
     padding_thickness = round( max( finalWidth*(sqrt(2)-cosd(45-thetamax).^-1),...
         finalHeight*(sqrt(2)-cosd(45-thetamax).^-1) ) );
-    width = finalWidth+rowshift-1+padding_thickness*2;
-    height = finalHeight+colshift-1+padding_thickness*2;
+    height = finalHeight+rowshift-1+padding_thickness*2;
+    width = finalWidth+colshift-1+padding_thickness*2;
     NAxons = randi([MinAxons MaxAxons]);                 % number of axons
     NBran = randi([MinBran MaxBran],1,NAxons);           % numbers of branchse per axons
     thickness = randi([round(MinThickness*100),...
@@ -243,9 +243,9 @@ disp(ncross);
 
 %%%%%%%%%%%%%%%% obtain rotated versions of the main image %%%%%%%%%%%%%%%%
 
-[rotatedCopies, rotatedSegmentations, rotatedAxonsGTPointsWithoutGap, rotatedAxonsGTPointsWithGap, width, height] = getRotatedIntensityMatrices...
+[rotatedCopies, rotatedSegmentations, rotatedAxonsGTPointsWithoutGap, rotatedAxonsGTPointsWithGap, height, width] = getRotatedIntensityMatrices...
     (AxonsDistWithoutGap, AxonsDistWithGap, AxonsGTPointsWithoutGap, AxonsGTPointsWithGap, AxonsVariationsWithGap,variationsWithoutGap,...
-    variationsWithGap, width, height, NbImages, padding_thickness, thetas, SegmentationThreshold, sigma_noise_axon, sigma_spread);
+    variationsWithGap, height, width, NbImages, padding_thickness, thetas, SegmentationThreshold, sigma_noise_axon, sigma_spread);
 
 %%%%%%%%%%%%%%%%%% adding circles representing boutons %%%%%%%%%%%%%%%%%%%%
 

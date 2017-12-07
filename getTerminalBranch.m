@@ -1,17 +1,47 @@
-function [terminalBranch,top_left,bottom_right] = getTerminalBranch(boutonInfo,sigma_spread,sigma_noise_axon)
+function [terminalBranch,top_left,bottom_right] = getTerminalBranch(boutonInfo,sigma_spread,sigma_noise_axon,height,width,image)
 
-% frame defined by GTPoint and center of bouton
-top_left = [floor(min(boutonInfo{7}(1,1),boutonInfo{2}(1))),floor(min(boutonInfo{7}(2,1),boutonInfo{2}(2)))];
-bottom_right = [ceil(max(boutonInfo{7}(1,1),boutonInfo{2}(1))),ceil(max(boutonInfo{7}(2,1),boutonInfo{2}(2)))];
-height = bottom_right(1)-top_left(1)+1;
-width = bottom_right(2)-top_left(2)+1;
+% This function draws the "link" between an axon branch and a terminal
+% bouton (ie those not located on an axon). It works the same way as the
+% axon were generated. We generate control points, then a spline is fitted
+% through those points. GT Points are then sampled from this spline. We
+% calculate a distance matrix which is then converted into an intensity
+% matrix (terminalBranch).
 
-%shift it to get top_left corner= [1,1]
-new_gtpoint = [boutonInfo{7}(1,1)-top_left(1)+1;boutonInfo{7}(2,1)-top_left(2)+1];
-new_center = [boutonInfo{2}(1)-top_left(1)+1;boutonInfo{2}(2)-top_left(2)+1];
+switch nargin
+    
+    case 5
+        
+    % frame defined by GTPoint and center of bouton
+    top_left = boutonInfo{9}(:,1);
+    bottom_right = boutonInfo{9}(:,2);
+    height = boutonInfo{11}(1);
+    width = boutonInfo{11}(2);
+
+    %shift it to get top_left corner= [1,1]
+    new_gtpoint = [boutonInfo{7}(1,1)-top_left(1)+1;boutonInfo{7}(2,1)-top_left(2)+1];
+    new_center = [boutonInfo{2}(1)-top_left(1)+1;boutonInfo{2}(2)-top_left(2)+1];
+    
+    %point between gt point and bouton center
+    interPoint = boutonInfo{10};
+    
+    case 6
+    
+    % frame defined by GTPoint and center of bouton
+    top_left = boutonInfo{9}(:,1,image);
+    bottom_right = boutonInfo{9}(:,2,image);
+    height = bottom_right(1)-top_left(1)+1;
+    width = bottom_right(2)-top_left(2)+1;
+
+    %shift it to get top_left corner= [1,1]
+    new_gtpoint = [boutonInfo{7}(1,1,image)-top_left(1)+1;boutonInfo{7}(2,1,image)-top_left(2)+1];
+    new_center = [boutonInfo{2}(1,1,image)-top_left(1)+1;boutonInfo{2}(2,1,image)-top_left(2)+1];
+    
+    %point between gt point and bouton center
+    interPoint = boutonInfo{10}(:,:,image);
+   
+end
 
 %define intermediate points
-interPoint = [1+(height-1)*rand(1);1+(width-1)*rand(1)];
 middle_gt = (interPoint+new_gtpoint)/2;
 middle_center = (interPoint+new_center)/2;
 ControlPoints = [new_gtpoint,middle_gt,interPoint,middle_center,new_center];

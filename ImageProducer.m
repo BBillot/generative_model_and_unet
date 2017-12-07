@@ -26,10 +26,10 @@ N = 20;                             % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
 json = 'parameters_256x256_images.json';   % name of the json file to load
 
-image_files = 'path_to_file/file_name';
-axon_mask_files = 'path_to_file/file_name';
-filled_images_files = 'path_to_file/file_name';
-bouton_mask_files = 'path_to_file/file_name';
+% image_files = 'path_to_file/file_name';
+% axon_mask_files = 'path_to_file/file_name';
+% filled_images_files = 'path_to_file/file_name';
+% bouton_mask_files = 'path_to_file/file_name';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% data generation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,23 +39,22 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=1:1:1
-        rng(16)
         [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
          images(:,:,i) = Patch;
          figure; imagesc(images(:,:,i)); colormap(gray); axis off;
-        images_gaps_filled(:,:,i) = PatchWithoutGap;
+%         images_gaps_filled(:,:,i) = PatchWithoutGap;
         axon_masks(:,:,i) = AxonSegmentation;
-        bouton_masks(:,:,i) = BoutonSegmentation;
-        data(i).GTPointsWithoutGap = GTPointsWithoutGap;
-        data(i).GTPointsWithGap = GTPointsWithGap;
-        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        data(i).GapSizes = GapSize;
-        if mod(i,50)==0
+%         bouton_masks(:,:,i) = BoutonSegmentation;
+%         data(i).GTPointsWithoutGap = GTPointsWithoutGap;
+%         data(i).GTPointsWithGap = GTPointsWithGap;
+%         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+%         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+%         data(i).GapSizes = GapSize;
+        %if mod(i,50)==0
             disp(i);
-        end 
+        %end 
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
@@ -84,3 +83,4 @@ toc
 % -make that the bouton can't be on another axon
 % -include Anil's circles
 % -integrate the changes in the time series model
+% -change the branchings

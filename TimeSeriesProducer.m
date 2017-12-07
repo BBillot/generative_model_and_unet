@@ -36,7 +36,6 @@ bouton_mask_files = 'path_to_file/file_name';
 
 parameters=loadjson(json);
 for chunk=1:Nchunks
-    
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
@@ -50,27 +49,23 @@ for chunk=1:Nchunks
         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
         data(i).GapSizes = GapSize;
-        if mod(i,5)==0
+        if mod(i,100)==0
             disp(i);
         end
     end
     
-    %saves the structure, the images, the axon and bouton masks in separate files
-    %     disp('saving data');
-    %     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-    %     save(path,'images','-v7.3')
-    %     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    %     save(path,'axon_masks','-v7.3')
-    %     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    %     save(path,'bouton_masks','-v7.3')
+    % saves the structure, the images, the axon and bouton masks in separate files
+        disp('saving data');
+        path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+        save(path,'images','-v7.3')
+        path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+        save(path,'axon_masks','-v7.3')
+        path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+        save(path,'bouton_masks','-v7.3')
     
 end
 
 toc
-
-im = images(:,:,:,i);        %first time series
-ma = axon_masks(:,:,:,i);    %corresponding axon segmentation maps
-bo = bouton_masks(:,:,:,i);  %corresponding bouton segmentation maps
 
 % plot the time series. change the number of columns and the type of image
 % you want to plot (im, ma, bo).

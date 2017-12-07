@@ -35,7 +35,7 @@ switch profileType
         %intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
         MaxIntensity = randi([min(round(startVariation)-1,MaxAxonIntensity-1),MaxAxonIntensity-1])/100;
         MinIntensity = randi([MinAxonIntensity+1,max(round(startVariation)+1,MinAxonIntensity+1)])/100;
-        if MinIntensity >= MaxIntensity
+        while MinIntensity >= MaxIntensity
             intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
             MaxIntensity = max(intensities)/100;
             MinIntensity = min(intensities)/100;
@@ -46,6 +46,9 @@ switch profileType
         upordown = randi(1); %intensity should increase or decrease from its starting point: 1=up 0=down
         if upordown
             variation = a+b*cos((0:2*pi*NPeriods/(NSplinePoints-1):2*pi*NPeriods)-phi);
+%             if isempty(find(variation<0, 1))
+%                 variation = startVariation*ones(1,NSplinePoints);
+%             end
         else
             variation = a+b*cos((0:2*pi*NPeriods/(NSplinePoints-1):2*pi*NPeriods)+phi);
         end

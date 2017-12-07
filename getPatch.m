@@ -65,7 +65,9 @@ function [AxonsPatch,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,..
     = getValues(parameters);
 
 restart=0;
+restarts = 0;
 while restart==0
+    restarts = restarts+1;
     NAxons = randi([MinAxons MaxAxons]);                 % number of axons
     NBran = randi([MinBran MaxBran],1,NAxons);           % numbers of branchse per axons
     thickness = randi([round(MinThickness*100),...
@@ -93,6 +95,10 @@ while restart==0
         if z>1
             pointerAxon = pointerAxon+NBran(z-1)*NSplinePoints;
         end
+        
+        if restarts ==3
+                y=1;
+            end
         
         ncross = 0;
         cross = 1;

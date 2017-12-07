@@ -1,4 +1,4 @@
-function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBouBrightness,thickness, InfoGTPoints,...
+function boutonsInfo = getInfoBoutons(height, width, AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness, InfoGTPoints,...
     NbImages, probBoutonInFirstImage, rowshift, colshift, finalHeight, finalWidth)
 
 % This function generates the parameters necessary to draw circles
@@ -10,35 +10,119 @@ function boutonsInfo = getInfoBoutons(AxonsGTPoints,NBou,MinBouBrightness,MaxBou
 % The results are returned in a cell format: 1st column=center,2nd=radius,
 % 3rd=image of apparition, 4th=duration, 5th=brightnesses.
 
-boutonsInfo = cell(NBou,5);
-
+boutonsInfo = cell(NBou,11);
 
 switch nargin
-    case 6
-        Points = randi(length(AxonsGTPoints),[1,NBou]);
-        %center of boutons
-        boutonsInfo(:,1) = mat2cell(round([AxonsGTPoints(1,Points);AxonsGTPoints(2,Points)])',ones(1,NBou));
-        %radius
-        boutonsInfo(:,2) = num2cell((floor(thickness(InfoGTPoints(3,Points)))+1)');
-        moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
-        boutonsInfo(:,5) = num2cell(moy);
-    case 12
+    
+    case 9
+        %type of boutons
+        boutonsInfo(:,1) = mat2cell(randi([0,1],[NBou,1]),ones(1,NBou));
         Points = zeros(1,NBou);
-        for i=1:NBou
-            Point = [-1;-1];
-            while(Point(1)<rowshift | Point(1)>rowshift+finalWidth | Point(2)<colshift | Point(2)>colshift+finalHeight)
-                Point_idx = randi(length(AxonsGTPoints));
-                Point = [AxonsGTPoints(1,Point_idx,1);AxonsGTPoints(2,Point_idx,1)];
+        %get center, and affiliated information in the caes of a TB
+        for bou=1:NBou
+            if boutonsInfo{bou,1} == 1
+                bouton_ok = 1;
+                while bouton_ok
+                    idx = randi([2,size(AxonsGTPoints,2)-1]);
+                    Points(bou) = idx;
+                    point = AxonsGTPoints(:,idx);
+                    thi = floor(thickness(InfoGTPoints(3,idx)))+1;
+                    rho = thi*(2.1+1*rand(1));
+                    thetamin = asin(2*thi/rho);
+                    theta = thetamin+(pi-2*thetamin)*rand(1);
+                    next_point = getNextPoint(AxonsGTPoints,idx,InfoGTPoints);
+                    R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
+                    new_center = round(point+rho/sqrt(sum((next_point-point).^2))*R*(next_point-point));
+                    if (new_center(1)>0 && new_center(1)<=height && new_center(2)>0 && new_center(2)<=width)
+                        boutonsInfo{bou,2} = new_center;
+                        boutonsInfo{bou,7} = [point, next_point];
+                        boutonsInfo{bou,8} = [variations(idx),thi];
+                        % frame defined by GTPoint and center of bouton
+                        top_left = [max(1,floor(min(point(1),new_center(1))));max(1,floor(min(point(2),new_center(2))))];
+                        bottom_right = [min(height,ceil(max(point(1),new_center(1))));min(width,ceil(max(point(2),new_center(2))))];
+                        new_height = bottom_right(1)-top_left(1)+1;
+                        new_width = bottom_right(2)-top_left(2)+1;
+                        %shift it to get top_left corner= [1,1]
+                        new_gtpoint = [point(1)-top_left(1)+1;point(2)-top_left(2)+1];
+                        new_bouton_center = [new_center(1)-top_left(1)+1;new_center(2)-top_left(2)+1];
+                        %pick a point between the gt point and the center of the bouton
+                        interPoint = [1+(new_height-1)*rand(1);1+(new_width-1)*rand(1)];
+                        boutonsInfo{bou,9} = [top_left,bottom_right];
+                        boutonsInfo{bou,10} = interPoint;
+                        boutonsInfo{bou,11} = [new_height; new_width];
+                        bouton_ok = 0;
+                    end
+                end
+            else
+                idx = randi(size(AxonsGTPoints,2));
+                Points(bou) = idx;
+                boutonsInfo{bou,2} = round(AxonsGTPoints(:,idx));
             end
-            Points(i) = Point_idx;
         end
-        
-        %center of boutons
-        boutonsInfo(:,1) = mat2cell(permute(round([AxonsGTPoints(1,Points,:);AxonsGTPoints(2,Points,:)]),[2,1,3]),ones(1,NBou));
         %radius
-        boutonsInfo(:,2) = num2cell((floor(thickness(InfoGTPoints(3,Points)))+1)');
+        boutonsInfo(:,3) = num2cell((floor(thickness(InfoGTPoints(3,Points)))+1)');
+        % bouton brightness
+        moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
+        boutonsInfo(:,6) = num2cell(moy);  
+        
+    case 15
+        %type of boutons
+        boutonsInfo(:,1) = mat2cell(randi([0,1],[NBou,1]),ones(1,NBou));
+        Points = zeros(1,NBou);
+        %get center, and affiliated information in the caes of a TB
+        for bou=1:NBou
+            if boutonsInfo{bou,1} == 1 %ie if this is a TB bouton
+                bouton_ok = 1;
+                while bouton_ok
+                    idx = randi([2,size(AxonsGTPoints,2)-1]);
+                    Points(bou) = idx; %select index of a GT Point
+                    point = AxonsGTPoints(:,idx,:); %gets the GT point
+                    thi = floor(thickness(InfoGTPoints(3,idx)))+1; %gets radius of the bouton = thickness of axon
+                    rho = thi*(2.1+1*rand(1)); %distance to the TB bouton
+                    thetamin = asin(2*thi/rho); 
+                    theta = thetamin+(pi-2*thetamin)*rand(1); %draw angle of rotation
+                    next_point = getNextPoint(AxonsGTPoints,idx,InfoGTPoints); 
+                    R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
+                    new_center = round(point(:,:,1)+rho/sqrt(sum((next_point(:,:,1)-point(:,:,1)).^2))*R*(next_point(:,:,1)-point(:,:,1)));
+                    if (new_center(1)>rowshift && new_center(1)<=rowshift+finalWidth && new_center(2)>colshift && new_center(2)<=colshift+finalHeight)
+                        for i=2:NbImages
+                            new_center = [new_center,round(point(:,:,i)+rho/sqrt(sum((next_point(:,:,i)-point(:,:,i)).^2))*R*(next_point(:,:,i)-point(:,:,i)))];
+                        end
+                        new_center = reshape(new_center,[2,1,NbImages]);
+                        boutonsInfo{bou,2} = new_center;
+                        boutonsInfo{bou,7} = [point, next_point];
+                        boutonsInfo{bou,8} = [variations(idx),thi];
+                        % frame defined by GTPoint and center of bouton
+                        top_left = max(1,floor(min([point, new_center],[],2)));
+                        bottom_right = floor(max([point, new_center],[],2));
+                        bottom_right(1,:,:) = min(bottom_right(1,:,:),height); bottom_right(2,:,:) = min(bottom_right(2,:,:),width);
+                        new_height = bottom_right(1,:,:)-top_left(1,:,:)+1;
+                        new_width = bottom_right(2,:,:)-top_left(2,:,:)+1;
+                        %pick a point between the gt point and the center of the bouton
+                        interPoint = [1+(new_height-1)*rand(1);1+(new_width-1)*rand(1)];
+                        boutonsInfo{bou,9} = [top_left,bottom_right];
+                        boutonsInfo{bou,10} = interPoint;
+                        boutonsInfo{bou,11} = [new_height; new_width];
+                        bouton_ok = 0;
+                    end
+                end
+            else
+                bouton_ok = 1;
+                while bouton_ok
+                    idx = randi(size(AxonsGTPoints,2));
+                    Points(bou) = idx;
+                    points = round(AxonsGTPoints(:,idx,:));
+                    if (points(1,1,1)>rowshift && points(1,1,1)<=rowshift+finalWidth && points(2,1,1)>colshift && points(2,1,1)<=colshift+finalHeight)
+                        boutonsInfo{bou,2} = points;
+                        bouton_ok = 0;
+                    end
+                end
+            end
+        end
+        %radius
+        boutonsInfo(:,3) = num2cell((floor(thickness(InfoGTPoints(3,Points)))+1)');
         %image of apparition and duration of a bouton
-        boutonsInfo(:,3:4) = num2cell(selection(NbImages,NBou,probBoutonInFirstImage));
+        boutonsInfo(:,4:5) = num2cell(selection(NbImages,NBou,probBoutonInFirstImage));
         %brightness of each bouton
         moy = randi([MinBouBrightness+1,MaxBouBrightness-1],NBou,1)/100;
         for bou=1:NBou
@@ -48,17 +132,38 @@ switch nargin
                 while ma==moy(bou)
                     ma = moy(bou) + (MaxBouBrightness/100-moy(bou))*rand;
                 end
-                brightness = moy(bou):(ma-moy(bou))/(boutonsInfo{bou,4}-1):ma;
+                brightness = moy(bou):(ma-moy(bou))/(boutonsInfo{bou,5}-1):ma;
             else
                 mi = moy(bou);
                 while mi==moy(bou)
                     mi = MinBouBrightness/100 + (moy(bou)-MinBouBrightness/100)*rand;
                 end
-                brightness = moy(bou):-(moy(bou)-mi)/(boutonsInfo{bou,4}-1):mi;
+                brightness = moy(bou):-(moy(bou)-mi)/(boutonsInfo{bou,5}-1):mi;
             end
-            
-            boutonsInfo{bou,5} = brightness;
+            boutonsInfo{bou,6} = brightness;
         end
+        
+        
+end
+
+end
+
+function next_point = getNextPoint(Points,idx_point,InfoGTPoints)
+
+upordown=randi(1);
+
+if upordown
+    if InfoGTPoints(3,idx_point)==InfoGTPoints(3,idx_point+1)
+        next_point = Points(:,idx_point+1,:);
+    else
+        next_point = Points(:,idx_point-1,:);
+    end
+elseif ~upordown
+    if InfoGTPoints(3,idx_point)==InfoGTPoints(3,idx_point+1)
+        next_point = Points(:,idx_point-1,:);
+    else
+        next_point = Points(:,idx_point+1,:);
+    end
 end
 
 end

@@ -24,7 +24,7 @@
 	"StepSize": 2,
 	"NSplinePoints": 200,
 	"crossingOK": 0,
-	"straightBranching": 10,
+	"straightBranching": 8,
 	"SegmentationThreshold": 2.7,
 	"sigma_spread": 1,
 	"MinAxonIntensity": 25,
