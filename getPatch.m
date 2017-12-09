@@ -48,7 +48,6 @@ function [AxonsPatch,AxonsPatchWithoutGap,AxonSegmentation,BoutonSegmentation,..
 % 5) If crossings aren't allowed, the time needed to generate an image is
 % not linear with image complexity. (1 axon without branch will take 1s
 % whereas 4 axons with each 4 branches will take around 45s sometimes more)
-% 6) Only one type of synaptic boutons have been modelled
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% initialisation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,37 +95,34 @@ while restart==0
             pointerAxon = pointerAxon+NBran(z-1)*NSplinePoints;
         end
         
-        if restarts ==3
-                y=1;
-            end
-        
         ncross = 0;
         cross = 1;
         while cross
             if crossingOK % if axons can cross we just get the starting point
-                [Xstart,Ystart,v] = getstartcoords(width,height);%randomly select the starting point
+                [start,v] = getstartcoords(height,width);%randomly select the starting point
                 cross=0;
             else % if they can't then we need to check if the randomly picked starting point is not already
                 %on an existing branch
                 startOK = 0;
                 while startOK==0
-                    [Xstart,Ystart,v] = getstartcoords(width,height);%randomly select the starting point
-                    if AxonsDistWithoutGap(Xstart,Ystart)==Inf %checks if it belongs to an existing branch
+                    [start,v] = getstartcoords(height,width);%randomly select the starting point
+                    if AxonsDistWithoutGap(start(1),start(2))==Inf %checks if it belongs to an existing branch
                         startOK = 1;
                     end
                 end
             end
-            xp = Xstart; yp = Ystart; ControlPoints = [xp;yp];
+            ControlPoints = start;
             AtTerminalState = 0;   %reinitialize value for testing
             while ~AtTerminalState
                 v  = getValidDirection(v,conformity);   %gets new direction
-                xp = xp + StepSize*v(1);                %updates xp
-                yp = yp + StepSize*v(2);                %updates yp
-                AtTerminalState = (xp <= 1 | xp >= width | yp <= 1 | yp >= height); %checks if inside
-                xp = min(xp,width); xp = max(xp,1);  %put xp at the border if it crossed it
-                yp = min(yp,height); yp = max(yp,1);  %put yp at the border if it crossed it
-                ControlPoints = [ControlPoints,[xp;yp]]; %stacks the new points inside a matrix
+                new_cpoint = ControlPoints(:,end)+StepSize*v;
+                AtTerminalState = (new_cpoint(1)<=1 | new_cpoint(1)>=height | new_cpoint(2)<=1 | new_cpoint(2)>=width); %checks if inside
+                ControlPoints = [ControlPoints,new_cpoint]; %stacks the new points inside a matrix
             end
+            ControlPoints(1,end) = min(ControlPoints(1,end),height); %put xp at the border if it crossed it
+            ControlPoints(1,end) = max(ControlPoints(1,end),1);      %put xp at the border if it crossed it
+            ControlPoints(2,end) = min(ControlPoints(2,end),width);  %put yp at the border if it crossed it
+            ControlPoints(2,end) = max(ControlPoints(2,end),1);      %put yp at the border if it crossed it
             
             %creates a spline going through all the ControlPoints
             AxonPoly = MakeAxonPoly(ControlPoints);
@@ -178,18 +174,25 @@ while restart==0
                 indicesCurrentAxon = InfoGTPointsWithGap(1,:)==z;
                 CurrentAxonGTPoints = AxonsGTPointsWithGap(:,indicesCurrentAxon);
                 CurrentAxonVariations = variationsWithGap(indicesCurrentAxon);
-                s = randi([1,size(CurrentAxonGTPoints,2)]);
+                s = randi([2,size(CurrentAxonGTPoints,2)]);
                 ControlPoints = CurrentAxonGTPoints(:,s);
-                xp = ControlPoints(1); yp = ControlPoints(2);
+                v = CurrentAxonGTPoints(:,s) - CurrentAxonGTPoints(:,s-1);
                 AtTerminalState = 0;                                     %reinitialize value for testing
                 while ~AtTerminalState
-                    v  = getValidDirection(v,conformity);                %gets new direction
-                    xp = xp + StepSize*v(1); yp = yp + StepSize*v(2);    %updates xp and yp
-                    AtTerminalState = (xp <= 1 | xp >= width | yp <= 1 | yp >= height);
-                    xp = min(xp,width);xp = max(xp,1);
-                    yp = min(yp,height);yp = max(yp,1);
-                    ControlPoints = [ControlPoints,[xp;yp]];
+                    if size(ControlPoints,2) == 1
+                        v = getValidDirection(v,cosd(45)); % maximum angle between previous and new beanch is 45?
+                    else
+                        v  = getValidDirection(v,conformity);
+                    end
+                        %gets new direction
+                        new_cpoint = ControlPoints(:,end) + StepSize*v;
+                        AtTerminalState = (new_cpoint(1,end)<=1 | new_cpoint(1,end)>=height | new_cpoint(2,end)<=1 | new_cpoint(2,end)>=width);
+                        ControlPoints = [ControlPoints,new_cpoint];
                 end
+                ControlPoints(1,end) = min(ControlPoints(1,end),height);
+                ControlPoints(1,end) = max(ControlPoints(1,end),1);
+                ControlPoints(2,end) = min(ControlPoints(2,end),width);
+                ControlPoints(2,end) = max(ControlPoints(2,end),1);
                 
                 AxonPoly = MakeAxonPoly(ControlPoints);
                 AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
@@ -289,277 +292,6 @@ if negative_image
 end
 
 end
-
-function [cross]=checkCrossings(AxonsDistWithoutGap,BranchDistWithoutGap,threshold,newStart)
-
-% Checks that the new branch doesn't cross existing axons.
-% We are forced to consider the case where a branch starts from another
-% branch. Obviously the new branch crosses its mother branch. So we
-% tolerate crossings in the vicinity of the branching point. Otherwise (if
-% crossing occurs far from the branching point), it probably
-% means the new branch crosses another branch.
-
-cross = 1;
-[row,col]=find(AxonsDistWithoutGap~=Inf & BranchDistWithoutGap~=Inf); %finds the pixels belonging to both branches
-
-if isempty(row)
-    cross=0;
-else
-    lIndices = length(row); %numbers of pixels common to both branches
-    l = 1; %initialization
-    while cross
-        thisRow = row(l); thisCol = col(l);
-        distToStartControlPoint = sqrt((newStart(1)-thisCol)^2+(newStart(2)-thisRow)^2); % distance to branching point
-        if distToStartControlPoint>threshold
-            break %two different branch cross,
-        elseif l==lIndices
-            cross=0; %if all the points are close enough then we consider that there is no crossing
-        else
-            l = l+1;
-        end
-    end
-    
-end
-
-end
-
-function [NewAxonsPatch, NbCircles] = getCircles(AxonsPatch,height,width,sigma_noise_circle,MinNbCircles,MaxNbCircles,...
-    CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius)
-
-% This function takes an image as input and returns the same image with
-% circles having been added. We randomly pick the center of the circle and
-% its radius. Then we check that the corresponding location in the original
-% image is empty. In that case we insert the circles after having added
-% some noise to it.
-
-% The intensity of a pixel is calculated by taking its distance to the
-% center of the circle according to a gaussian profile.
-
-% There are two sources of noise in this function. This first one consists
-% to reset some pixel of the distance matrix to the radius value. This is
-% done to mimick what is observed in real Two Photon Microscopy images
-% (black dots). The second source of noise is simply a white noise.
-
-% We have to consider the cases where the circle could be on one edge of
-% the image (9 cases).
-
-NewAxonsPatch = AxonsPatch;
-NbCircles = randi([MinNbCircles,MaxNbCircles]);
-
-
-for nbCircle=1:NbCircles
-    
-    cross = 1;
-    radius = randi([MinRadius,MaxRadius]); %picks a radius
-    SelectionPixel = randi([1,1+CircleBrightness]);
-    brightness = randi([MinBrightnessCircles,MaxBrightnessCircles])/100; %picks the brightness of the circle
-    
-    while cross
-        center=zeros(1,2);
-        center(1)=randi(width); center(2)=randi(height); %defines the center of the circle
-        
-        if (center(1)-radius>0 && center(2)-radius>0 && center(1)+radius<=width && center(2)+radius<=height) %middle
-            if AxonsPatch(center(2)-radius:center(2)+radius,center(1)-radius:center(1)+radius)==zeros(2*radius+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=center(2)+radius;
-                refAbs=radius+1; refOrd=radius+1;
-            end
-        elseif (center(1)-radius<=0 && center(2)-radius<=0) %top left
-            if AxonsPatch(1:center(2)+radius,1:center(1)+radius)==zeros(center(2)+radius,center(1)+radius)
-                cross=0;
-                absInf=1; absSup=center(1)+radius; ordInf=1; ordSup=center(2)+radius;
-                refAbs=center(1); refOrd=center(2);
-            end
-        elseif (center(2)+radius>width && center(1)-radius<=0) %bottom left
-            if AxonsPatch(center(2)-radius:height,1:center(1)+radius)==zeros(radius+height-center(2)+1,center(1)+radius)
-                cross=0;
-                absInf=1; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=height;
-                refAbs=center(1); refOrd=radius+1;
-            end
-        elseif (center(2)-radius<=0 && center(1)+radius>height) %top right
-            if AxonsPatch(1:center(2)+radius,center(1)-radius:width)==zeros(center(2)+radius,radius+width-center(1)+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=width; ordInf=1; ordSup=center(2)+radius;
-                refAbs=radius+1; refOrd=center(2);
-            end
-        elseif (center(1)+radius>width && center(2)+radius>height) %bottom right
-            if AxonsPatch(center(2)-radius:height,center(1)-radius:width)==...
-                    zeros(radius+height-center(2)+1,radius+width-center(1)+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=width; ordInf=center(2)-radius; ordSup=height;
-                refAbs=radius+1; refOrd=radius+1;
-            end
-        elseif (center(2)-radius<=0) %top
-            if AxonsPatch(1:center(2)+radius,center(1)-radius:center(1)+radius)==zeros(center(2)+radius,2*radius+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=center(1)+radius; ordInf=1; ordSup=center(2)+radius;
-                refAbs=radius+1; refOrd=center(2);
-            end
-            
-        elseif (center(2)+radius>width) % bottom
-            if AxonsPatch(center(2)-radius:height,center(1)-radius:center(1)+radius)==zeros(radius+height-center(2)+1,2*radius+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=height;
-                refAbs=radius+1; refOrd=radius+1;
-            end
-        elseif (center(1)-radius<=0) %left
-            if AxonsPatch(center(2)-radius:center(2)+radius,1:center(1)+radius)==zeros(2*radius+1,center(1)+radius)
-                cross=0;
-                absInf=1; absSup=center(1)+radius; ordInf=center(2)-radius; ordSup=center(2)+radius;
-                refAbs=center(1); refOrd=radius+1;
-            end
-        elseif (center(1)+radius>height) %right
-            if AxonsPatch(center(2)-radius:center(2)+radius,center(1)-radius:width)==zeros(2*radius+1,radius+width-center(1)+1)
-                cross=0;
-                absInf=center(1)-radius; absSup=width; ordInf=center(2)-radius; ordSup=center(2)+radius;
-                refAbs=radius+1; refOrd=radius+1;
-            end
-        end
-        
-    end
-    
-    [X,Y] = meshgrid(1:absSup-absInf+1,1:ordSup-ordInf+1);
-    SelectionMatrix = randi(SelectionPixel,ordSup-ordInf+1,absSup-absInf+1); %matrix of integers between 1 and a set number
-    dist = sqrt((X(:,:)-refAbs).^2+(Y(:,:)-refOrd).^2); %gets the distance to the center
-    v = sqrt(-radius^2/(2*log(0.05/brightness))); % sigma coefficient for VaryingIntensityWithDistance
-    IndicesSel = find(SelectionMatrix==SelectionPixel);
-    IndicesRad = find(dist>radius);
-    for i=1:length(IndicesSel)
-        thisRow = Y(IndicesSel(i));
-        thisCol = X(IndicesSel(i));
-        dist(thisRow,thisCol) = radius; %reset the distance to radius in order to obtain black pixel in the circle
-    end
-    for i=1:length(IndicesRad)
-        thisRow = Y(IndicesRad(i));
-        thisCol = X(IndicesRad(i));
-        dist(thisRow,thisCol)=Inf; %sets distance to Inf for pixel outside the circle range, they will be black
-    end
-    dist = dist+sigma_noise_circle*randn(ordSup-ordInf+1,absSup-absInf+1); %adds white noise to the circle
-    dist = VaryingIntensityWithDistance(dist,'circle','gauss',v,0,brightness); %gets intensity out of distance
-    NewAxonsPatch(ordInf:ordSup,absInf:absSup) = max...
-        (NewAxonsPatch(ordInf:ordSup,absInf:absSup),dist); %puts back the circle in the Patch
-    
-end
-
-end
-
-function [StartX,StartY,u0] = getstartcoords(width,height)
-
-% Randomly generates a starting on one of the four edges
-
-whichside = randi(4,1); % One random number from 1 to 4
-
-switch whichside
-    case 1
-        StartX = 1;
-        StartY = randi([round(height/4),round(3*height/4)],1);
-        u0 = [1,0];
-    case 2
-        StartX = randi([round(width/4),round(3*width/4)],1);
-        StartY = 1;
-        u0 = [0,1];
-    case 3
-        StartX = width;
-        StartY = randi([round(height/4),round(3*height/4)],1);
-        u0 = [-1,0];
-    case 4
-        StartX = randi([round(width/4),round(3*width/4)],1);
-        StartY = height;
-        u0 = [0,-1];
-end
-end
-
-function u = getValidDirection(v, conformity)
-
-%Gets a direction that more or less moves forward from the previous
-%direction. Some deviation allowed as a straight tube vessel isn't
-%interesting
-
-%Increase if you want a straighter vessel.
-%Decerease to make it curve more
-v = v/norm(v); %normalize v
-NoValidDirection = 1;
-while NoValidDirection
-    u = makerandunitdirvec(1);
-    dp = v*u';
-    if dp>conformity
-        NoValidDirection = 0;
-    end
-end
-end
-
-function [width,height,negative_image,maxIntensity,...
-    sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
-    MinAxons,MaxAxons,MinBran,MaxBran,...
-    conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
-    StepSize,NSplinePoints,crossingOK,straightBranching,SegmentationThreshold,...
-    sigma_spread,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod,AxonProfile,BranchProfile,sigma_noise_axon,...
-    MinNbBouton,MaxNbBouton,MinBouRadius,MaxBouRadius,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,...
-    MinNbCircles,MaxNbCircles,CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
-    = getValues(parameters)
-
-% This function takes out the parameters from the structure
-
-width = parameters(1).width;
-height = parameters(1).height;
-negative_image = parameters(1).negative_image;
-maxIntensity = parameters(1).maxIntensity;
-
-sigma_noise_min = parameters(1).sigma_noise_min;
-sigma_noise_max = parameters(1).sigma_noise_max;
-lambdaMin = parameters(1).lambdaMin;
-lambdaMax = parameters(1).lambdaMax;
-
-MinAxons = parameters(1).MinAxons;
-MaxAxons = parameters(1).MaxAxons;
-MinBran = parameters(1).MinBran;
-MaxBran = parameters(1).MaxBran;
-
-conformity = parameters(1).conformity;
-MinThickness = parameters(1).MinThickness;
-MaxThickness = parameters(1).MaxThickness;
-MinGapSize = parameters(1).MinGapSize;
-MaxGapSize = parameters(1).MaxGapSize;
-
-StepSize = parameters(1).StepSize;
-NSplinePoints = parameters(1).NSplinePoints;
-crossingOK = parameters(1).crossingOK;
-straightBranching = parameters(1).straightBranching;
-SegmentationThreshold = parameters(1).SegmentationThreshold;
-
-sigma_spread = parameters(1).sigma_spread;
-MinAxonIntensity = parameters(1).MinAxonIntensity;
-MaxAxonIntensity = parameters(1).MaxAxonIntensity;
-MinPeriod = parameters(1).MinPeriod;
-MaxPeriod = parameters(1).MaxPeriod;
-AxonProfile = parameters(1).AxonProfile;
-BranchProfile = parameters(1).BranchProfile;
-sigma_noise_axon = parameters(1).sigma_noise_axon;
-
-MinNbBouton = parameters(1).MinNbBouton;
-MaxNbBouton = parameters(1).MaxNbBouton;
-MinBouRadius = parameters(1).MinBouRadius;
-MaxBouRadius = parameters(1).MaxBouRadius;
-MinBrightnessBouton  = parameters(1).MinBrightnessBouton;
-MaxBrightnessBouton  = parameters(1).MaxBrightnessBouton;
-sigma_noise_bouton = parameters(1).sigma_noise_bouton;
-
-MinNbCircles = parameters(1).MinNbCircles;
-MaxNbCircles = parameters(1).MaxNbCircles;
-MinRadius = parameters(1).MinRadius;
-MaxRadius = parameters(1).MaxRadius;
-CircleBrightness = parameters(1).CircleBrightness;
-MinBrightnessCircles = parameters(1).MinBrightnessCircles;
-MaxBrightnessCircles = parameters(1).MaxBrightnessCircles;
-sigma_noise_circle = parameters(1).sigma_noise_circle;
-
-end
-
-function u1 = makerandunitdirvec(N)
-v = randn(N,2);
-u1 = bsxfun(@rdivide,v,sqrt(sum(v.^2,2))); %normalize the vector v
-end
-
 
 function Patch = noise (Patch,sigmawn,lambda,height,width)
 

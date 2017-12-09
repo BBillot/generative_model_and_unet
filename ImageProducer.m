@@ -22,7 +22,7 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 20;                             % number of images per chunk of data
+N = 1;                             % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
 json = 'parameters_256x256_images.json';   % name of the json file to load
 
@@ -43,29 +43,28 @@ for chunk=1:Nchunks
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
          images(:,:,i) = Patch;
-         figure; imagesc(images(:,:,i)); colormap(gray); axis off;%         images_gaps_filled(:,:,i) = PatchWithoutGap;
-        axon_masks(:,:,i) = AxonSegmentation;
-        bouton_masks(:,:,i) = BoutonSegmentation;
-        data(i).GTPointsWithoutGap = GTPointsWithoutGap;
-        data(i).GTPointsWithGap = GTPointsWithGap;
-        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        data(i).GapSizes = GapSize;
+         axon_masks(:,:,i) = AxonSegmentation;
+         bouton_masks(:,:,i) = BoutonSegmentation;
+%          data(i).GTPointsWithoutGap = GTPointsWithoutGap;
+%          data(i).GTPointsWithGap = GTPointsWithGap;
+%          data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+%          data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+%          data(i).GapSizes = GapSize;
         if mod(i,50)==0
             disp(i);
         end 
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
-    disp('saving data');
-    path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'images','-v7.3')
-    path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'axon_masks','-v7.3')
-    path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'images_gaps_filled','-v7.3')
-    path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'bouton_masks','-v7.3')
+%     disp('saving data');
+%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'images','-v7.3')
+%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'axon_masks','-v7.3')
+%     path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'images_gaps_filled','-v7.3')
+%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'bouton_masks','-v7.3')
     
 end
 
