@@ -81,4 +81,3 @@ toc
 % -make that the bouton can't be on another axon
 % -include Anil's circles
 % -integrate the changes in the time series model
-% -change the branchings

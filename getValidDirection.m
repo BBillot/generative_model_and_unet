@@ -19,5 +19,5 @@ end
 
 function u1 = makerandunitdirvec(N)
 v = randn(N,1);
-u1 = bsxfun(@rdivide,v,sqrt(sum(v.^2,2))); %normalize the vector v
+u1 = v/sqrt(sum(v.^2)); %normalize the vector v
 end
