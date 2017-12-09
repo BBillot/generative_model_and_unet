@@ -20,7 +20,7 @@ NBou = randi([MinNbBouton,MaxNbBouton]);
 switch nargin
     
     case 14
-        boutonsInfo = getInfoBoutons2(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints);
+        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints);
         BoutonSegmentation = zeros(height,width);
         for bou=1:NBou
             %draw a bouton
@@ -37,7 +37,7 @@ switch nargin
         BoutonSegmentation = logical(BoutonSegmentation);
         
     case 20
-        boutonsInfo = getInfoBoutons2(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,...
+        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,...
             NbImages,probBoutonInFirstImage,rowshift, colshift, finalHeight, finalWidth);
         BoutonSegmentation = zeros(height,width,NbImages);
         for image=1:NbImages
