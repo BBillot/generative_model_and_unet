@@ -20,8 +20,8 @@ probBoutInFirstImage = 0.3;  % Probability of a bouton to appear in the first im
 % Set the different sources of noise
 sigma_noise_min = 10;        % Set min gaussian white noise level (integer)
 sigma_noise_max = 10;        % Set max gaussian white noise level (integer)
-lambdaMin = 7;               % Set max Poisson noise level (integer)
-lambdaMax = 7;               % Set min Poisson noise level (integer)
+lambdaMin = 14;               % Set max Poisson noise level (integer)
+lambdaMax = 14;               % Set min Poisson noise level (integer)
 
 % Numbers of Axons and branches
 MinAxons = 2;                % Set minimum number of axons in the image (integer)
@@ -138,4 +138,4 @@ AxonParameters(1).sigma_noise_circle = sigma_noise_circle;
 %%%%%%%%%%%%%%%%%%% saving the structure in a JSON file %%%%%%%%%%%%%%%%%%%
 
 clearvars -except AxonParameters
-savejson('',AxonParameters,'parameters_256x256_images.json');
+savejson('',AxonParameters,'256x256.json');

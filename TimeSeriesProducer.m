@@ -24,7 +24,7 @@ close all;
 
 N = 1;                               % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
-json = 'parameters_256x256_images.json';   % name of the json file to load
+json = '256x256.json';   % name of the json file to load
 
 image_files = 'path_to_file/file_name';
 axon_mask_files = 'path_to_file/file_name';
@@ -43,25 +43,25 @@ for chunk=1:Nchunks
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
-        bouton_masks(:,:,:,i) = BoutonsSegmentation;
-        data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
-        data(i).GTPointsWithGap = rotatedGTPointsWithGap;
-        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        data(i).GapSizes = GapSize;
+%         bouton_masks(:,:,:,i) = BoutonsSegmentation;
+%         data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
+%         data(i).GTPointsWithGap = rotatedGTPointsWithGap;
+%         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+%         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+%         data(i).GapSizes = GapSize;
         if mod(i,100)==0
             disp(i);
         end
     end
     
     % saves the structure, the images, the axon and bouton masks in separate files
-    disp('saving data');
-    path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'images','-v7.3')
-    path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'axon_masks','-v7.3')
-    path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-    save(path,'bouton_masks','-v7.3')
+%     disp('saving data');
+%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'images','-v7.3')
+%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'axon_masks','-v7.3')
+%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+%     save(path,'bouton_masks','-v7.3')
     
 end
 

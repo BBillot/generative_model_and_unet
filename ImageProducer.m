@@ -18,13 +18,13 @@
 
 tic
 clear;
-close all;
+%close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 1;                             % number of images per chunk of data
-Nchunks = 1;                         % total number of chunks
-json = 'parameters_256x256_images.json';   % name of the json file to load
+N = 1;                   % number of images per chunk of data
+Nchunks = 1;             % total number of chunks
+json = '256x256.json';   % name of the json file to load
 
 % image_files = 'path_to_file/file_name';
 % axon_mask_files = 'path_to_file/file_name';
@@ -39,6 +39,7 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
+        rng(35);
         [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
@@ -76,7 +77,7 @@ figure; imagesc(im); colormap(gray); axis off;
 toc
 
 %TODO :
-% -fix terminal branches, make them fuzzier
+% -make them fuzzier
 % -minimum distance between boutons
 % -make that the bouton can't be on another axon
 % -include Anil's circles

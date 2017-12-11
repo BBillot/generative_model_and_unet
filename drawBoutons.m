@@ -64,7 +64,7 @@ for i = 1:length(Indices)
     bouton(thisRow,thisCol) = Inf; %set the distance to Inf
 end
 boutonSegm = (bouton<Inf); % gets all the point of the bouton
-bouton = bouton + noise*randn(rowSup-rowInf+1, colSup-colInf+1);
+bouton = bouton + noise*randn(size(bouton,1), size(bouton,2));
 bouton = VaryingIntensityWithDistance(bouton,'circle','gauss',v,0,brightness); %gets the intensity of bouton
 
 end

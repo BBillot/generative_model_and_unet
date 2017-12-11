@@ -23,10 +23,15 @@ NbCircles = randi([MinNbCircles,MaxNbCircles]);
 
 for nbCircle=1:NbCircles
     
+    % randomly pick parameters for the cell to draw
     radius = randi([MinRadius,MaxRadius]); %picks a radius
     SelectionPixel = randi([1,1+CircleBrightness]);
     brightness = randi([MinBrightnessCircles,MaxBrightnessCircles])/100; %picks the brightness of the circle
-    [dist,ordInf,ordSup,absInf,absSup] = drawCircles(AxonsPatch,radius,SelectionPixel,brightness,height,width,sigma_noise_circle);
+    
+    % draw the circle
+    [dist,ordInf,ordSup,absInf,absSup] = drawCells(AxonsPatch,radius,SelectionPixel,brightness,height,width,sigma_noise_circle);
+    
+    %put back the cell in the image
     NewAxonsPatch(ordInf:ordSup,absInf:absSup,:) = max...
         (NewAxonsPatch(ordInf:ordSup,absInf:absSup,:),repmat(dist,[1,1,size(AxonsPatch,3)])); %puts back the circle in the Patch
 
