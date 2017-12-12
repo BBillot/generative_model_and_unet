@@ -29,11 +29,11 @@ for nbCircle=1:NbCircles
     brightness = randi([MinBrightnessCircles,MaxBrightnessCircles])/100; %picks the brightness of the circle
     
     % draw the circle
-    [dist,ordInf,ordSup,absInf,absSup] = drawCells(AxonsPatch,radius,SelectionPixel,brightness,height,width,sigma_noise_circle);
+    [dist,rowInf,rowSup,colInf,colSup] = drawCells(AxonsPatch,radius,SelectionPixel,brightness,height,width,sigma_noise_circle);
     
     %put back the cell in the image
-    NewAxonsPatch(ordInf:ordSup,absInf:absSup,:) = max...
-        (NewAxonsPatch(ordInf:ordSup,absInf:absSup,:),repmat(dist,[1,1,size(AxonsPatch,3)])); %puts back the circle in the Patch
+    NewAxonsPatch(rowInf:rowSup,colInf:colSup,:) = max...
+        (NewAxonsPatch(rowInf:rowSup,colInf:colSup,:),repmat(dist,[1,1,size(AxonsPatch,3)])); %puts back the circle in the Patch
 
 end
 
