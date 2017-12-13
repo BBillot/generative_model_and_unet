@@ -39,8 +39,7 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        rng(49)
-        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
+            [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
          images(:,:,i) = Patch;

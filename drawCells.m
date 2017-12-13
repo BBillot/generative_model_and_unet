@@ -8,11 +8,11 @@ h = radius+cradius;
 
 %get all the locations of the noise sources
 NSources = 5;
-rowNoiseSources=[h+1, h+1+randi([-ceil(radius/2)+1,ceil(radius/2)-1],1,NSources-1)];
-colNoiseSources=[h+1, h+1+randi([-ceil(radius/2)+1,ceil(radius/2)-1],1,NSources-1)];
+rowNoiseSources=[h+1, h+1+randi([-cradius+1,cradius-1],1,NSources-1)];
+colNoiseSources=[h+1, h+1+randi([-cradius+1,cradius-1],1,NSources-1)];
 
 % sigma to make gaussian profile reach 5% of its peak at the radius
-v = sqrt(-radius^2/(2*log(0.05/brightness)));
+v = sqrt(-radius^2/(2*log(0.05*brightness)));
 
 % gets the pixel distances to the center of the cell and define points out
 % the circle
@@ -24,7 +24,7 @@ end
 dist(dist>radius) = Inf;
 
 %convolve the obtained matrix with gaussian mask, to deform the image
-MaskSize = ceil(radius*0.85);
+MaskSize = ceil(radius*0.5);
 g2 = fspecial('gaussian',MaskSize,v);
 dist = conv2(dist,g2,'same');
 

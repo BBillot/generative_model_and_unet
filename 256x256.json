@@ -45,8 +45,8 @@
 	"MaxNbCircles": 13,
 	"MinRadius": 3,
 	"MaxRadius": 20,
-	"CircleBrightness": 1,
+	"CircleBrightness": 2,
 	"MinBrightnessCircles": 10,
-	"MaxBrightnessCircles": 20,
+	"MaxBrightnessCircles": 30,
 	"sigma_noise_circle": 1.3
 }

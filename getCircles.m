@@ -25,7 +25,7 @@ for nbCircle=1:NbCircles
     
     % randomly pick parameters for the cell to draw
     radius = randi([MinRadius,MaxRadius]); %picks a radius
-    SelectionPixel = randi([1,1+CircleBrightness]);
+    SelectionPixel = randi([2,4]);
     brightness = randi([MinBrightnessCircles,MaxBrightnessCircles])/100; %picks the brightness of the circle
     
     % draw the circle
