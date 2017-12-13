@@ -76,7 +76,5 @@ ma=axon_masks(:,:,1);
 toc
 
 %TODO :
-% -make them fuzzier
-% -minimum distance between boutons
 % -make that the bouton can't be on another axon
-% -integrate the changes in the time series model
+% -fix boutons problem in time)series model (getBoutons line 49)

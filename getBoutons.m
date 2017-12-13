@@ -1,5 +1,5 @@
 function [AxonsPatch,BoutonSegmentation] = getBoutons(AxonsPatch,AxonsGTPoints, variations, MinNbBouton,MaxNbBouton,...
-    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, sigma_spread, sigma_noise_axon,InfoGTPoints,...
+    MinBouBrightness, MaxBouBrightness, BouSigma, height, width, thickness, sigma_spread, sigma_noise_axon,InfoGTPoints,minDistBetweenBoutons,...
     NbImages,probBoutonInFirstImage,rowshift, colshift, finalHeight, finalWidth)
 
 %, MinBouRadius,MaxBouRadius)
@@ -19,8 +19,8 @@ NBou = randi([MinNbBouton,MaxNbBouton]);
 
 switch nargin
     
-    case 14
-        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints);
+    case 15
+        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,minDistBetweenBoutons);
         BoutonSegmentation = zeros(height,width);
         for bou=1:NBou
             %draw a bouton
@@ -36,8 +36,8 @@ switch nargin
         end
         BoutonSegmentation = logical(BoutonSegmentation);
         
-    case 20
-        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,...
+    case 21
+        boutonsInfo = getInfoBoutons(height,width,AxonsGTPoints,variations,NBou,MinBouBrightness,MaxBouBrightness,thickness,InfoGTPoints,minDistBetweenBoutons,...
             NbImages,probBoutonInFirstImage,rowshift, colshift, finalHeight, finalWidth);
         BoutonSegmentation = zeros(height,width,NbImages);
         for image=1:NbImages

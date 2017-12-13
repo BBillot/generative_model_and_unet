@@ -61,15 +61,16 @@ MaxBouRadius = 3;            % Set the maximum radius of  the boutons (integer)
 MinBrightnessBouton = 30;    % Set the brightness of the boutons (integer between 0 and 100)
 MaxBrightnessBouton = 40;    % Set the brightness of the boutons (integer between 0 and 100)
 sigma_noise_bouton = 1;      % Set the noise level for the boutons  (real number)
+minDistBetweenBoutons = 8;   % Set the minimum distance between boutons (real number)
 
 % Shape of the circles
-MinNbCircles = 6;            % Set the min number of circles in the image (integer)
-MaxNbCircles = 9;            % Set the max number of circles in the image (integer)
+MinNbCircles = 13;            % Set the min number of circles in the image (integer)
+MaxNbCircles = 13;            % Set the max number of circles in the image (integer)
 MinRadius = 3;               % Minimum radius for a cell (integer)
 MaxRadius = 20;              % Maximum radius for a cell (integer) 
 CircleBrightness = 1;        % Set if we want bright cells (0/1)
 MinBrightnessCircles = 10;   % Minimum level of cell intensity (fine tuning) (integer between 0 and 100)
-MaxBrightnessCircles = 20;   % Maximum level of cell intensity (fine tuning) (integer between 0 and 100)
+MaxBrightnessCircles = 30;   % Maximum level of cell intensity (fine tuning) (integer between 0 and 100)
 sigma_noise_circle = 1.3;    % Set white noise whithin a circle (real number)
 
 
@@ -124,6 +125,7 @@ AxonParameters(1).MaxBouRadius = MaxBouRadius;
 AxonParameters(1).MinBrightnessBouton = MinBrightnessBouton;
 AxonParameters(1).MaxBrightnessBouton = MaxBrightnessBouton;
 AxonParameters(1).sigma_noise_bouton = sigma_noise_bouton;
+AxonParameters(1).minDistBetweenBoutons = minDistBetweenBoutons;
 
 AxonParameters(1).MinNbCircles = MinNbCircles;
 AxonParameters(1).MaxNbCircles = MaxNbCircles;
