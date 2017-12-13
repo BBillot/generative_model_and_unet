@@ -73,13 +73,10 @@ end
 im = images(:,:,1);
 ma=axon_masks(:,:,1);
 
-
-
 toc
 
 %TODO :
 % -make them fuzzier
 % -minimum distance between boutons
 % -make that the bouton can't be on another axon
-% -include Anil's circles
 % -integrate the changes in the time series model

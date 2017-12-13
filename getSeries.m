@@ -80,17 +80,18 @@ while restart==0
     GapSize = zeros(1,sum(NBran));                       % size of the gap in each branch
     TotalPoints = sum(NBran)*NSplinePoints;              % number of interpolating points
     AxonsGTPointsWithoutGap = zeros(2,TotalPoints);      % vector of the interpolating points
-    AxonsGTPointsWithGap = [];                           % vector of the interpolating point once gaps have been inserted
+    AxonsGTPointsWithGap = [];                           % vector of the interpolating points with gap
     variationsWithoutGap = zeros(1,TotalPoints);         % vector of the intensity variations
     variationsWithGap = [];                              % vector on the intensity variations once gaps have been inserted
-    InfoGTPointsWithoutGap = [];                         % contains info about interpolating points
-    InfoGTPointsWithGap = [];                            % contains info about interpolating points once gaps have been inserted
     pointer = 0;                                         % points to the current branch
     pointerAxon = 1;                                     % points to the start of the current axon in the GTPoints
-    AxonsDistWithoutGap = Inf(height,width);             % distance to the AxonsGTPoints without taking gaps into account
-    AxonsDistWithGap = Inf(height,width);                % distance to the AxonsGTPoints
-    AxonsVariationsWithGap = Inf(height,width);                 % describes intensity variations along axons taking gaps into account
-    AxonsVariationsWithoutGap = Inf(height,width);       % describes intensity variations but without gaps
+    AxonsDistWithoutGap = Inf*ones(height,width);        % distance to the AxonsGTPoints without taking gaps into account
+    AxonsDistWithGap = Inf*ones(height,width);           % distance to the AxonsGTPoints
+    AxonsVariationsWithGap = Inf*ones(height,width);     % describes intensity variations along axons taking gaps into account
+    AxonsVariationsWithoutGap = Inf*ones(height,width);  % describes intensity variations but without gaps
+    InfoGTPointsWithoutGap = [];                         % contains info about interpolating points
+    InfoGTPointsWithGap = [];
+    
     
     
     
@@ -106,29 +107,30 @@ while restart==0
         cross = 1;
         while cross
             if crossingOK % if axons can cross we just get the starting point
-                [Xstart,Ystart,v] = getstartcoords(width,height);%randomly select the starting point
+                [start,v] = getstartcoords(height,width);%randomly select the starting point
                 cross=0;
             else % if they can't then we need to check if the randomly picked starting point is not already
                 %on an existing branch
                 startOK = 0;
                 while startOK==0
-                    [Xstart,Ystart,v] = getstartcoords(width,height);%randomly select the starting point
-                    if AxonsDistWithoutGap(Xstart,Ystart)==Inf %checks if it belongs to an existing branch
+                    [start,v] = getstartcoords(height,width);%randomly select the starting point
+                    if AxonsDistWithoutGap(start(1),start(2))==Inf %checks if it belongs to an existing branch
                         startOK = 1;
                     end
                 end
             end
-            xp = Xstart; yp = Ystart; ControlPoints = [xp;yp];
+            ControlPoints = start;
             AtTerminalState = 0;   %reinitialize value for testing
             while ~AtTerminalState
                 v  = getValidDirection(v,conformity);   %gets new direction
-                xp = xp + StepSize*v(1);                %updates xp
-                yp = yp + StepSize*v(2);                %updates yp
-                AtTerminalState = (xp <= 1 | xp >= width | yp <= 1 | yp >= height); %checks if inside
-                xp = min(xp,width); xp = max(xp,1);  %put xp at the border if it crossed it
-                yp = min(yp,height); yp = max(yp,1);  %put yp at the border if it crossed it
-                ControlPoints = [ControlPoints,[xp;yp]]; %stacks the new points inside a matrix
+                new_cpoint = ControlPoints(:,end)+StepSize*v;
+                AtTerminalState = (new_cpoint(1)<=1 | new_cpoint(1)>=height | new_cpoint(2)<=1 | new_cpoint(2)>=width); %checks if inside
+                ControlPoints = [ControlPoints,new_cpoint]; %stacks the new points inside a matrix
             end
+            ControlPoints(1,end) = min(ControlPoints(1,end),height); %put xp at the border if it crossed it
+            ControlPoints(1,end) = max(ControlPoints(1,end),1);      %put xp at the border if it crossed it
+            ControlPoints(2,end) = min(ControlPoints(2,end),width);  %put yp at the border if it crossed it
+            ControlPoints(2,end) = max(ControlPoints(2,end),1);      %put yp at the border if it crossed it
             
             %creates a spline going through all the ControlPoints
             AxonPoly = MakeAxonPoly(ControlPoints);
@@ -180,18 +182,25 @@ while restart==0
                 indicesCurrentAxon = InfoGTPointsWithGap(1,:)==z;
                 CurrentAxonGTPoints = AxonsGTPointsWithGap(:,indicesCurrentAxon);
                 CurrentAxonVariations = variationsWithGap(indicesCurrentAxon);
-                s = randi([1,size(CurrentAxonGTPoints,2)]);
+                s = randi([2,size(CurrentAxonGTPoints,2)]);
                 ControlPoints = CurrentAxonGTPoints(:,s);
-                xp = ControlPoints(1); yp = ControlPoints(2);
+                v = CurrentAxonGTPoints(:,s) - CurrentAxonGTPoints(:,s-1);
                 AtTerminalState = 0;                                     %reinitialize value for testing
                 while ~AtTerminalState
-                    v  = getValidDirection(v,conformity);                %gets new direction
-                    xp = xp + StepSize*v(1); yp = yp + StepSize*v(2);    %updates xp and yp
-                    AtTerminalState = (xp <= 1 | xp >= width | yp <= 1 | yp >= height);
-                    xp = min(xp,width);xp = max(xp,1);
-                    yp = min(yp,height);yp = max(yp,1);
-                    ControlPoints = [ControlPoints,[xp;yp]];
+                    if size(ControlPoints,2) == 1
+                        v = getValidDirection(v,cosd(45)); % maximum angle between previous and new beanch is 45?
+                    else
+                        v  = getValidDirection(v,conformity);
+                    end
+                        %gets new direction
+                        new_cpoint = ControlPoints(:,end) + StepSize*v;
+                        AtTerminalState = (new_cpoint(1,end)<=1 | new_cpoint(1,end)>=height | new_cpoint(2,end)<=1 | new_cpoint(2,end)>=width);
+                        ControlPoints = [ControlPoints,new_cpoint];
                 end
+                ControlPoints(1,end) = min(ControlPoints(1,end),height);
+                ControlPoints(1,end) = max(ControlPoints(1,end),1);
+                ControlPoints(2,end) = min(ControlPoints(2,end),width);
+                ControlPoints(2,end) = max(ControlPoints(2,end),1);
                 
                 AxonPoly = MakeAxonPoly(ControlPoints);
                 AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
@@ -278,89 +287,6 @@ AxonsSeries = noise(AxonsSeries, sigma_noise, lambda, width, height);
 end
 
 
-
-
-
-
-
-function [cross]=checkCrossings(AxonsDistWithoutGap,BranchDistWithoutGap,threshold,newStart)
-
-% Checks that the new branch doesn't cross existing axons.
-% We are forced to consider the case where a branch starts from another
-% branch. Obviously the new branch crosses its mother branch. So we
-% tolerate crossings in the vicinity of the branching point. Otherwise (if
-% crossing occurs far from the branching point), it probably
-% means the new branch crosses another branch.
-
-cross = 1;
-[row,col]=find(AxonsDistWithoutGap~=Inf & BranchDistWithoutGap~=Inf); %finds the pixels belonging to both branches
-
-if isempty(row)
-    cross=0;
-else
-    lIndices = length(row); %numbers of pixels common to both branches
-    l = 1; %initialization
-    while cross
-        thisRow = row(l); thisCol = col(l);
-        distToStartControlPoint = sqrt((newStart(1)-thisCol)^2+(newStart(2)-thisRow)^2); % distance to branching point
-        if distToStartControlPoint>threshold
-            break %two different branch cross,
-        elseif l==lIndices
-            cross=0; %if all the points are close enough then we consider that there is no crossing
-        else
-            l = l+1;
-        end
-    end
-    
-end
-
-end
-
-function [StartX,StartY,u0] = getstartcoords(width,height)
-
-% Randomly generates a starting on one of the four edges
-
-whichside = randi(4,1); % One random number from 1 to 4
-
-switch whichside
-    case 1
-        StartX = 1;
-        StartY = randi([round(height/4),round(3*height/4)],1);
-        u0 = [1,0];
-    case 2
-        StartX = randi([round(width/4),round(3*width/4)],1);
-        StartY = 1;
-        u0 = [0,1];
-    case 3
-        StartX = width;
-        StartY = randi([round(height/4),round(3*height/4)],1);
-        u0 = [-1,0];
-    case 4
-        StartX = randi([round(width/4),round(3*width/4)],1);
-        StartY = height;
-        u0 = [0,-1];
-end
-end
-
-function u = getValidDirection(v, conformity)
-
-%Gets a direction that more or less moves forward from the previous
-%direction. Some deviation allowed as a straight tube vessel isn't
-%interesting
-
-%Increase if you want a straighter vessel.
-%Decerease to make it curve more
-v = v/norm(v); %normalize v
-NoValidDirection = 1;
-while NoValidDirection
-    u = makerandunitdirvec(1);
-    dp = v*u';
-    if dp>conformity
-        NoValidDirection = 0;
-    end
-end
-end
-
 function [width,height,negative_image,maxIntensity,...
     NbImages,rowshift,colshift,maxRotAngle,probBoutonInFirstImage,...
     sigma_noise_min,sigma_noise_max,lambdaMin,lambdaMax,...
@@ -434,9 +360,4 @@ MinBrightnessCircles = parameters(1).MinBrightnessCircles;
 MaxBrightnessCircles = parameters(1).MaxBrightnessCircles;
 sigma_noise_circle = parameters(1).sigma_noise_circle;
 
-end
-
-function u1 = makerandunitdirvec(N)
-v = randn(N,2);
-u1 = bsxfun(@rdivide,v,sqrt(sum(v.^2,2))); %normalize the vector v
 end
