@@ -26,26 +26,27 @@ switch nargin
                 bouton_ok = 1;
                 while bouton_ok %ie until the center is in the image range
                     
-                    idx = randi([2,size(AxonsGTPoints,2)-1]);
-                    Points(bou) = idx;
-                    point = AxonsGTPoints(:,idx);
-                    thi = floor(thickness(InfoGTPoints(3,idx)))+1;
-                    rho = thi*(2.1+1*rand(1));
-                    thetamin = asin(2*thi/rho);
-                    theta = thetamin+(pi-2*thetamin)*rand(1);
-                    next_point = getNextPoint(AxonsGTPoints,idx,InfoGTPoints);
-                    R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
-                    new_center = round(point+rho/sqrt(sum((next_point-point).^2))*R*(next_point-point));
+                    idx = randi([2,size(AxonsGTPoints,2)-1]); %pick the id of a GT Point
+                    Points(bou) = idx; %store this id
+                    point = AxonsGTPoints(:,idx); %store the point
+                    thi = floor(thickness(InfoGTPoints(3,idx)))+1; %thickness of the corresponding axon
+                    rho = thi*(2.1+1*rand(1)); %distance bewteen the gt point and the center of the tb bouton
+                    thetamin = asin(2*thi/rho); %min rotation angle possible (for the center not overlapping the axon)
+                    theta = thetamin+(pi-2*thetamin)*rand(1); %pick rotation angle
+                    next_point = getNextPoint(AxonsGTPoints,idx,InfoGTPoints); %pick one of the two neighbour gt point
+                    R = [cos(theta), -sin(theta); sin(theta), cos(theta)]; %rotation matrix
+                    new_center = round(point+rho/sqrt(sum((next_point-point).^2))*R*(next_point-point)); %center of the tb bouton
                     
-                    if (bou==1 || max(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons)
+                    %check if bouton is far enough from the existing ones
+                    if (bou==1 || min(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons)
                         
                         if (new_center(1)>0 && new_center(1)<=height && new_center(2)>0 && new_center(2)<=width)
-                            boutonsInfo{bou,2} = new_center;
-                            centers = [centers,new_center];
-                            boutonsInfo{bou,7} = [point, next_point];
-                            boutonsInfo{bou,8} = [variations(idx),thi];
+                            boutonsInfo{bou,2} = new_center; %store new center
+                            centers = [centers,new_center]; %update collection of bouton centers
+                            boutonsInfo{bou,7} = [point, next_point]; %store the two points used to calculate the center
+                            boutonsInfo{bou,8} = [variations(idx),thi]; %store axon's intensity and thickness
                             
-                            % frame defined by GTPoint and center of bouton
+                            % extract new frame defined by GTPoint and center of bouton
                             top_left = [max(1,floor(min(point(1),new_center(1))));max(1,floor(min(point(2),new_center(2))))];
                             bottom_right = [min(height,ceil(max(point(1),new_center(1))));min(width,ceil(max(point(2),new_center(2))))];
                             new_height = bottom_right(1)-top_left(1)+1;
@@ -62,18 +63,18 @@ switch nargin
                         end
                     end
                 end
-            else
+            else % if not a tb bouton
                 centerOK = 1;
                 while centerOK %redraw the center if it's too close to the other centers
                     idx = randi(size(AxonsGTPoints,2));
                     new_center = round(AxonsGTPoints(:,idx));
-                    if (bou == 1 || max(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons)
+                    if (bou == 1 || min(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons)
                         centerOK = 0;
                     end
                 end
                 Points(bou) = idx;
                 boutonsInfo{bou,2} = new_center;
-                centers = [centers, new_center];
+                centers = [centers, new_center]; %update collection of bouton centers
             end
         end
         %radius
@@ -104,7 +105,7 @@ switch nargin
                     new_center = round(point(:,:,1)+rho/sqrt(sum((next_point(:,:,1)-point(:,:,1)).^2))*R*(next_point(:,:,1)-point(:,:,1)));
                     
                     if (new_center(1)>rowshift && new_center(1)<=rowshift+finalWidth && new_center(2)>colshift && new_center(2)<=colshift+finalHeight...
-                            && (bou==1 || max(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons))
+                            && (bou==1 || min(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons))
                         for i=2:NbImages
                             new_center = [new_center,round(point(:,:,i)+rho/sqrt(sum((next_point(:,:,i)-point(:,:,i)).^2))*R*(next_point(:,:,i)-point(:,:,i)))];
                         end
@@ -138,7 +139,7 @@ switch nargin
                     Points(bou) = idx;
                     points = round(AxonsGTPoints(:,idx,:));
                     if (points(1,1,1)>rowshift && points(1,1,1)<=rowshift+finalWidth && points(2,1,1)>colshift && points(2,1,1)<=colshift+finalHeight ...
-                            && (bou==1 || max(distE(centers(1,:),centers(2,:),points(:,:,1))) > minDistBetweenBoutons))
+                            && (bou==1 || min(distE(centers(1,:),centers(2,:),points(:,:,1))) > minDistBetweenBoutons))
                         boutonsInfo{bou,2} = points;
                         centers = [centers,points(:,:,1)];
                         bouton_ok = 0;

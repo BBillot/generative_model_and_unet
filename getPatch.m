@@ -132,7 +132,7 @@ while restart==0
             
             %fills the variation vector for this branch
             variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
-                (randi([MinAxonIntensity,MaxAxonIntensity])/100,AxonProfile,NSplinePoints,MinAxonIntensity,...
+                (MinAxonIntensity+0.01+(MaxAxonIntensity-MinAxonIntensity-0.02)*rand(1),AxonProfile,NSplinePoints,MinAxonIntensity,...
                 MaxAxonIntensity,MinPeriod,MaxPeriod);
             
             %gets the distance to the GTPoints of the pixels belonging to the spline
@@ -360,8 +360,8 @@ straightBranching = parameters(1).straightBranching;
 SegmentationThreshold = parameters(1).SegmentationThreshold;
 
 sigma_spread = parameters(1).sigma_spread;
-MinAxonIntensity = parameters(1).MinAxonIntensity;
-MaxAxonIntensity = parameters(1).MaxAxonIntensity;
+MinAxonIntensity = parameters(1).MinAxonIntensity/100;
+MaxAxonIntensity = parameters(1).MaxAxonIntensity/100;
 MinPeriod = parameters(1).MinPeriod;
 MaxPeriod = parameters(1).MaxPeriod;
 AxonProfile = parameters(1).AxonProfile;

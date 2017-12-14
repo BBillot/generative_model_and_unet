@@ -6,6 +6,10 @@ function variation = makeVariation(startVariation,profileType,NSplinePoints,MinA
 % spline points in a branch. Indeed each spline points will be associated
 % with a multiplicative coefficient for its intensity.
 
+if startVariation>1
+    disp('variation>1');
+end
+
 switch profileType
     
     case {'constant'}
@@ -14,31 +18,32 @@ switch profileType
     case {'linear'} %linear variation of intensity along the branch.
         upordown = randi(1); %intensity should increase or decrease from its starting point: 1=up 0=down
         if upordown
-            MaxIntensity = randi([min(round(startVariation*10),MaxAxonIntensity*10-1),MaxAxonIntensity*10-1])/10;
+            MaxIntensity = startVariation + (MaxAxonIntensity - min(startVariation,MaxAxonIntensity-0.01)) * rand(1);
             if startVariation~=MaxIntensity
                 variation = startVariation:(MaxIntensity-startVariation)/(NSplinePoints-1):MaxIntensity;
             else
                 variation = startVariation*ones(1,NSplinePoints);
             end
+            disp(startVariation); disp(MaxIntensity);
         else
-            MinIntensity = randi([MinAxonIntensity*10+1,max(round(startVariation*10),MinAxonIntensity*10+1)])/10;
+            MinIntensity = startVariation - (max(startVariation,MinAxonIntensity+0.01) - MinAxonIntensity) * rand(1);
             if startVariation~=MinIntensity
                 variation = startVariation:-(startVariation-MinIntensity)/(NSplinePoints-1):MinIntensity;
             else
                 variation = startVariation*ones(1,NSplinePoints);
             end
+            disp(startVariation); disp(MinIntensity);
         end
         
+        
     case {'cosine'} %cosine variation of intensity along a branch
-        NPeriods = randi([MinPeriod*100,MaxPeriod*100])/100;
-        if startVariation<1, startVariation = startVariation*100; end
-        %intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
-        MaxIntensity = randi([min(round(startVariation)-1,MaxAxonIntensity-1),MaxAxonIntensity-1])/100;
-        MinIntensity = randi([MinAxonIntensity+1,max(round(startVariation)+1,MinAxonIntensity+1)])/100;
+        NPeriods = MinPeriod + (MaxPeriod-MinPeriod) * rand(1);
+        MaxIntensity = startVariation + (MaxAxonIntensity - min(startVariation,MaxAxonIntensity-0.01)) * rand(1);
+        MinIntensity = startVariation - (max(startVariation,MinAxonIntensity+0.01) - MinAxonIntensity) * rand(1);
         while MinIntensity >= MaxIntensity
-            intensities = randi([MinAxonIntensity+1,MaxAxonIntensity-1],[1,2]); %draw two numbers from intensity range
-            MaxIntensity = max(intensities)/100;
-            MinIntensity = min(intensities)/100;
+            intensities = MinAxonIntensity+0.01+(MaxAxonIntensity-MinAxonIntensity-0.02)*rand(1,2); %draw two numbers from intensity range
+            MaxIntensity = max(intensities);
+            MinIntensity = min(intensities);
         end
         a = 0.5*(MaxIntensity+MinIntensity); b = 0.5*(MaxIntensity-MinIntensity);
         %real part is due to no infinite calculation accuracy that leads to complex number for acos(1)
@@ -46,9 +51,6 @@ switch profileType
         upordown = randi(1); %intensity should increase or decrease from its starting point: 1=up 0=down
         if upordown
             variation = a+b*cos((0:2*pi*NPeriods/(NSplinePoints-1):2*pi*NPeriods)-phi);
-%             if isempty(find(variation<0, 1))
-%                 variation = startVariation*ones(1,NSplinePoints);
-%             end
         else
             variation = a+b*cos((0:2*pi*NPeriods/(NSplinePoints-1):2*pi*NPeriods)+phi);
         end

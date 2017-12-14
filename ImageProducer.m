@@ -7,8 +7,8 @@
 % (XYStart) and the last one ([XEnd,YEnd]), and the sizes of the gaps in
 % each branch (GapSize).
 
-% The resulting images ('images.mat'), the axon segmentations 
-% ('axon_masks.mat') and the bouton segmentations ('bouton_masks.mat') are 
+% The resulting images ('images.mat'), the axon segmentations
+% ('axon_masks.mat') and the bouton segmentations ('bouton_masks.mat') are
 % saved in separate files.
 
 % Depending on size and the amount of data that one wishes to generate,
@@ -22,7 +22,7 @@ clear;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 1;                   % number of images per chunk of data
+N = 5;                   % number of images per chunk of data
 Nchunks = 1;             % total number of chunks
 json = '256x256.json';   % name of the json file to load
 
@@ -36,37 +36,40 @@ json = '256x256.json';   % name of the json file to load
 
 parameters=loadjson(json);
 for chunk=1:Nchunks
-    
+    a=[];
     %creates N images with associated parameters stored in 'data' structure
-    for i=N:-1:1
-            [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
+    for i=1:-1:1
+        seed = randi(10000);
+        rng(seed);
+        a = [a,seed];
+        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
-         images(:,:,i) = Patch;
-         axon_masks(:,:,i) = AxonSegmentation;
-         bouton_masks(:,:,i) = BoutonSegmentation;
-         
-         figure; imagesc(images(:,:,i)); colormap(gray); axis off;
-%          data(i).GTPointsWithoutGap = GTPointsWithoutGap;
-%          data(i).GTPointsWithGap = GTPointsWithGap;
-%          data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-%          data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-%          data(i).GapSizes = GapSize;
+        images(:,:,i) = Patch;
+        axon_masks(:,:,i) = AxonSegmentation;
+        bouton_masks(:,:,i) = BoutonSegmentation;
+        
+        figure; imagesc(images(:,:,i)); colormap(gray);
+        %          data(i).GTPointsWithoutGap = GTPointsWithoutGap;
+        %          data(i).GTPointsWithGap = GTPointsWithGap;
+        %          data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+        %          data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+        %          data(i).GapSizes = GapSize;
         if mod(i,50)==0
             disp(i);
-        end 
+        end
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
-%     disp('saving data');
-%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'images','-v7.3')
-%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'axon_masks','-v7.3')
-%     path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'images_gaps_filled','-v7.3')
-%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'bouton_masks','-v7.3')
+    %     disp('saving data');
+    %     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'images','-v7.3')
+    %     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'axon_masks','-v7.3')
+    %     path = strcat(strcat(filled_images_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'images_gaps_filled','-v7.3')
+    %     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    %     save(path,'bouton_masks','-v7.3')
     
 end
 
@@ -77,4 +80,5 @@ toc
 
 %TODO :
 % -make that the bouton can't be on another axon
-% -fix boutons problem in time)series model (getBoutons line 49)
+% -fix boutons problem in time series model (getBoutons line 49)
+% -make bigger variations along axons

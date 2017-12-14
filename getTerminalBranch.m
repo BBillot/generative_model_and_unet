@@ -1,8 +1,8 @@
 function [terminalBranch,top_left,bottom_right] = getTerminalBranch(boutonInfo,sigma_spread,sigma_noise_axon,height,width,image)
 
 % This function draws the "link" between an axon branch and a terminal
-% bouton (ie those not located on an axon). It works the same way as the
-% axon were generated. We generate control points, then a spline is fitted
+% bouton (ie those not located on the axons). It works the same way as the
+% axons were created. We generate control points, then a spline is fitted
 % through those points. GT Points are then sampled from this spline. We
 % calculate a distance matrix which is then converted into an intensity
 % matrix (terminalBranch).
