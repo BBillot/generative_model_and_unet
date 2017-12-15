@@ -22,7 +22,7 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 1;                               % number of images per chunk of data
+N = N;                               % number of images per chunk of data
 Nchunks = 1;                         % total number of chunks
 json = '256x256.json';   % name of the json file to load
 
@@ -43,31 +43,31 @@ for chunk=1:Nchunks
             InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
-%         bouton_masks(:,:,:,i) = BoutonsSegmentation;
-%         data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
-%         data(i).GTPointsWithGap = rotatedGTPointsWithGap;
-%         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-%         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-%         data(i).GapSizes = GapSize;
+        bouton_masks(:,:,:,i) = BoutonsSegmentation;
+        data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
+        data(i).GTPointsWithGap = rotatedGTPointsWithGap;
+        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
+        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
+        data(i).GapSizes = GapSize;
         if mod(i,100)==0
             disp(i);
         end
     end
     
-    % saves the structure, the images, the axon and bouton masks in separate files
-%     disp('saving data');
-%     path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'images','-v7.3')
-%     path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'axon_masks','-v7.3')
-%     path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
-%     save(path,'bouton_masks','-v7.3')
+    %saves the structure, the images, the axon and bouton masks in separate files
+    disp('saving data');
+    path = strcat(strcat(image_files,'_'),strcat(num2str(chunk),'.mat'));
+    save(path,'images','-v7.3')
+    path = strcat(strcat(axon_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    save(path,'axon_masks','-v7.3')
+    path = strcat(strcat(bouton_mask_files,'_'),strcat(num2str(chunk),'.mat'));
+    save(path,'bouton_masks','-v7.3')
     
 end
 
 toc
 
-% plot the time series. change the number of columns and the type of image
+% plot the 1st time serie. change the number of columns and the type of image
 type = images;
 Plotcols = 3;
 figure;

@@ -45,7 +45,7 @@ SegmentationThreshold = 2.7; % Threshold for obtaining the true segmentation (se
 
 % Intensity of the axons
 sigma_spread = 1;            % std deviation of the gaussian profile for axons (real number)
-MinAxonIntensity = 25;       % Minimum level of intensity for an axon (integer between 0 and 100)
+MinAxonIntensity = 10;       % Minimum level of intensity for an axon (integer between 0 and 100)
 MaxAxonIntensity = 40;       % Maximum level of intensity for an axon (integer between 0 and 100)
 MinPeriod = 0.1;             % Min spatial period for intensity variation along axons for a cosine profile (real number)
 MaxPeriod = 2;               % Max spatial period for intensity variation along axons for a cosine profile (real number)
@@ -56,8 +56,6 @@ sigma_noise_axon = 0.055;    % Set the white noise level for an axon (real numbe
 % Shape of the synaptic Boutons
 MinNbBouton = 7;             % Set the minimum number of boutons (integer)
 MaxNbBouton = 7;             % Set the maximum number of boutons (integer)
-MinBouRadius = 3;            % Set the minimum radius of  the boutons (integer)
-MaxBouRadius = 3;            % Set the maximum radius of  the boutons (integer)
 MinBrightnessBouton = 30;    % Set the brightness of the boutons (integer between 0 and 100)
 MaxBrightnessBouton = 40;    % Set the brightness of the boutons (integer between 0 and 100)
 sigma_noise_bouton = 1;      % Set the noise level for the boutons  (real number)
@@ -120,8 +118,6 @@ AxonParameters(1).sigma_noise_axon = sigma_noise_axon;
 
 AxonParameters(1).MinNbBouton = MinNbBouton;
 AxonParameters(1).MaxNbBouton = MaxNbBouton;
-AxonParameters(1).MinBouRadius = MinBouRadius;
-AxonParameters(1).MaxBouRadius = MaxBouRadius;
 AxonParameters(1).MinBrightnessBouton = MinBrightnessBouton;
 AxonParameters(1).MaxBrightnessBouton = MaxBrightnessBouton;
 AxonParameters(1).sigma_noise_bouton = sigma_noise_bouton;
