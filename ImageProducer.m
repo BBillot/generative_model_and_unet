@@ -40,7 +40,7 @@ for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=1:-1:1
         seed = randi(10000);
-        rng(seed);
+        rng(2137);
         a = [a,seed];
         [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
             GTPointsWithoutGap,GTPointsWithGap,...
@@ -81,4 +81,3 @@ toc
 %TODO :
 % -make that the bouton can't be on another axon
 % -fix boutons problem in time series model (getBoutons line 49)
-% -make bigger variations along axons

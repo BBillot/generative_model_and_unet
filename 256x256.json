@@ -20,7 +20,7 @@
 	"MinThickness": 1.5,
 	"MaxThickness": 3,
 	"MinGapSize": 0,
-	"MaxGapSize": 3,
+	"MaxGapSize": 0,
 	"StepSize": 3,
 	"NSplinePoints": 200,
 	"crossingOK": 0,
