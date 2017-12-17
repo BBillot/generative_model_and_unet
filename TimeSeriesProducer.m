@@ -22,8 +22,8 @@ close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = N;                               % number of images per chunk of data
-Nchunks = 1;                         % total number of chunks
+N = 200;                 % number of images per chunk of data
+Nchunks = 1;             % total number of chunks
 json = '256x256.json';   % name of the json file to load
 
 image_files = 'path_to_file/file_name';
@@ -33,25 +33,25 @@ bouton_mask_files = 'path_to_file/file_name';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% data generation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+a=[];
 parameters=loadjson(json);
 for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
+
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
-            rotatedGTPointsWithoutGap,rotatedGTPointsWithGap,...
-            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
+            rotatedGTPoints,InfoGTPoints,gapIndices] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
         bouton_masks(:,:,:,i) = BoutonsSegmentation;
-        data(i).GTPointsWithoutGap = rotatedGTPointsWithoutGap;
-        data(i).GTPointsWithGap = rotatedGTPointsWithGap;
-        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        data(i).GapSizes = GapSize;
-        if mod(i,100)==0
+        data(i).GTPoints = rotatedGTPoints;
+        data(i).InfoGTPoints = InfoGTPoints;
+        data(i).gapIndices = gapIndices;
+
+        if mod(i,50)==0
             disp(i);
         end
+        
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files
@@ -70,6 +70,7 @@ toc
 % plot the 1st time serie. change the number of columns and the type of image
 type = images;
 Plotcols = 3;
+
 figure;
 Plotrows = ceil(size(type,3)/Plotcols);
 for i=1:size(type,3)

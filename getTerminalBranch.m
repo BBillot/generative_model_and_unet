@@ -53,7 +53,7 @@ terminalGTPoints = getAxonsGTPoints(terminalSpline,20);
 %get distance matrix
 variation = boutonInfo{8}(1)*ones(1,size(terminalGTPoints,2));
 thick = boutonInfo{8}(2)/2;
-[terminalDist,~,~,terminalVariations,~,~,~] = PixDistanceToAxon(height,width,terminalGTPoints,thick,0,0,variation);
+[terminalDist,terminalVariations] = PixDistanceToAxon(height,width,terminalGTPoints,thick,variation);
 terminalVariations = terminalVariations + sigma_noise_axon*randn(height,width);
 
 %convert it to intensity matrix

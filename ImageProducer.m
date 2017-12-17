@@ -37,20 +37,22 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
-            GTPointsWithoutGap,GTPointsWithGap,...
-            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
+        
+        %create individual image
+        [Patch,AxonSegmentation,BoutonSegmentation,GTPoints,InfoGTPoints,gapindices]...
+            = getPatch(parameters);
+        %save image and related information
         images(:,:,i) = Patch;
         axon_masks(:,:,i) = AxonSegmentation;
         bouton_masks(:,:,i) = BoutonSegmentation;
-        data(i).GTPointsWithoutGap = GTPointsWithoutGap;
-        data(i).GTPointsWithGap = GTPointsWithGap;
-        data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        data(i).GapSizes = GapSize;
+        data(i).GTPoints = GTPoints;
+        data(i).InfoGTPoints = InfoGTPoints;
+        data(i).gapindices = gapindices;
+
         if mod(i,50)==0
             disp(i);
         end
+        
     end
     
     %saves the structure, the images, the axon and bouton masks in separate files

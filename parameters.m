@@ -33,7 +33,7 @@ MaxBran = 2;                 % Set maximum number of branches for an axon (integ
 conformity = 0.99;           % Set how straight the axon is (real number between 0 and 0.9999)
 MinThickness = 1.5;          % Set Min thickness of vessels (real number)
 MaxThickness = 3;            % Set Max thickness of vessels (real number)
-MinGapSize = 0;              % Set gap size (positive integer)
+MinGapSize = 1;              % Set gap size (positive integer)
 MaxGapSize = 4;              % if you don't want any gap set both to 0 (positive integer)
 
 % Construction of axons
@@ -66,7 +66,6 @@ MinNbCircles = 13;            % Set the min number of circles in the image (inte
 MaxNbCircles = 13;            % Set the max number of circles in the image (integer)
 MinRadius = 3;               % Minimum radius for a cell (integer)
 MaxRadius = 20;              % Maximum radius for a cell (integer) 
-CircleBrightness = 1;        % Set if we want bright cells (0/1)
 MinBrightnessCircles = 10;   % Minimum level of cell intensity (fine tuning) (integer between 0 and 100)
 MaxBrightnessCircles = 30;   % Maximum level of cell intensity (fine tuning) (integer between 0 and 100)
 sigma_noise_circle = 1.3;    % Set white noise whithin a circle (real number)
@@ -127,7 +126,6 @@ AxonParameters(1).MinNbCircles = MinNbCircles;
 AxonParameters(1).MaxNbCircles = MaxNbCircles;
 AxonParameters(1).MinRadius = MinRadius;
 AxonParameters(1).MaxRadius = MaxRadius;
-AxonParameters(1).CircleBrightness = CircleBrightness;
 AxonParameters(1).MinBrightnessCircles = MinBrightnessCircles;
 AxonParameters(1).MaxBrightnessCircles = MaxBrightnessCircles;
 AxonParameters(1).sigma_noise_circle = sigma_noise_circle;
