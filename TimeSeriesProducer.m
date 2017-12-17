@@ -33,14 +33,16 @@ bouton_mask_files = 'path_to_file/file_name';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% data generation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+a=[];
 parameters=loadjson(json);
 for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
+        seed = randi(10000);
+        rng(seed);
+        a = [a,seed];
         [TimeSeries,AxonsSegmentation,BoutonsSegmentation,...
-            rotatedGTPointsWithoutGap,rotatedGTPointsWithGap,...
-            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getSeries(parameters);
+            rotatedGTPoints,InfoGTPoints,GapSize] = getSeries(parameters);
         images(:,:,:,i) = TimeSeries;
         axon_masks(:,:,:,i) = AxonsSegmentation;
 %         bouton_masks(:,:,:,i) = BoutonsSegmentation;
@@ -48,7 +50,7 @@ for chunk=1:Nchunks
 %         data(i).GTPointsWithGap = rotatedGTPointsWithGap;
 %         data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
 %         data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-%         data(i).GapSizes = GapSize;
+%         data(i).gapindices = gapindices;
         if mod(i,100)==0
             disp(i);
         end

@@ -1,5 +1,5 @@
-function variation = makeVariation(startVariation,profileType,NSplinePoints,MinAxonIntensity,...
-    MaxAxonIntensity,MinPeriod,MaxPeriod)
+function [variation, gapindices] = makeVariation(startVariation,profileType,NSplinePoints,MinAxonIntensity,...
+    MaxAxonIntensity,MinPeriod,MaxPeriod,MinGapSize,MaxGapSize)
 
 % This function generates vectors with values evolving according to a
 % given profile. The length of this vector is the same as the number of
@@ -53,14 +53,18 @@ switch profileType
         
 end
 
-variation = makeGap(variation,5);
+%add gap to the axons
+if MaxGapSize >0
+    gapsize = randi([MinGapSize,MaxGapSize]);
+    [variation, gapindices] = makeGap(variation,gapsize);
+end
 
 end
 
-function variation = makeGap(variation,gapsize)
+function [variation, gapindices] = makeGap(variation,gapsize)
 
 % This function selects a point of the variation vector and set its value
-% to zero. On each side of this point the variations go back linearly to 
+% to zero. On each side of this point the variations go back linearly to
 % the value they had originally.
 
 % select an index that will be set to zero
@@ -68,34 +72,46 @@ idx= randi(length(variation));
 
 if idx >= gapsize && idx <= length(variation)-gapsize
     
-% mofify the part just before the selected index
-variation(max(idx-gapsize,1):idx) = ...
-    variation(max(idx-gapsize,1)) : -variation(max(idx-gapsize,1))/min(gapsize,idx-1) : 0;
-
-% mofify the part just after the selected index
-variation(idx:min(idx+gapsize,length(variation))) = ...
-    0 : variation(min(idx+gapsize,length(variation)))/min(gapsize,length(variation)-idx) : variation(min(idx+gapsize,length(variation)));
-
+    gapindices = max(idx-gapsize,1)+1:min(idx+gapsize,length(variation))-1;
+    
+    % mofify the part just before the selected index
+    variation(max(idx-gapsize,1):idx) = ...
+        variation(max(idx-gapsize,1)) : -variation(max(idx-gapsize,1))/min(gapsize,idx-1) : 0;
+    
+    % mofify the part just after the selected index
+    variation(idx:min(idx+gapsize,length(variation))) = ...
+        0 : variation(min(idx+gapsize,length(variation)))/min(gapsize,length(variation)-idx) : variation(min(idx+gapsize,length(variation)));
+    
 elseif idx == 1
+    
+    gapindices = 1:gapsize;
     
     variation(1:gapsize+1) = 0 : variation(gapsize)/gapsize : variation(gapsize);
     
 elseif idx == length(variation)
     
+    gapindices = length(variation)-gapsize+1:length(variation);
+    
     variation(end-gapsize:end) = variation(end-gapsize) : -variation(end-gapsize)/gapsize : 0;
     
 elseif idx < gapsize
+    
+    gapindices = 1:min(idx+gapsize,length(variation))-1;
+    
     variation(1:idx) = ...
         variation(1) -(gapsize-idx+1)*variation(1)/gapsize: -(variation(1) -(gapsize-idx+1)*variation(1)/gapsize)/(idx-1) : 0;
-
-variation(idx:min(idx+gapsize,length(variation))) = ...
-    0 : variation(min(idx+gapsize,length(variation)))/min(gapsize,length(variation)-idx) : variation(min(idx+gapsize,length(variation)));
+    
+    variation(idx:min(idx+gapsize,length(variation))) = ...
+        0 : variation(min(idx+gapsize,length(variation)))/min(gapsize,length(variation)-idx) : variation(min(idx+gapsize,length(variation)));
     
 elseif idx > length(variation) - gapsize
+    
+    gapindices = max(idx-gapsize,1)+1:length(variation);
+    
     variation(max(idx-gapsize,1):idx) = ...
         variation(max(idx-gapsize,1)) : -variation(max(idx-gapsize,1))/min(gapsize,idx-1) : 0;
     
-    variation(idx:min(idx+gapsize,length(variation))) = ...
+    variation(idx:length(variation)) = ...
         0 : (variation(end)-(gapsize+idx-length(variation))*variation(end)/gapsize)/(length(variation)-idx) : variation(end) - (gapsize+idx-length(variation))*variation(end)/gapsize;
 end
 

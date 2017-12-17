@@ -22,7 +22,7 @@ clear;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% parameters to set %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = 5;                   % number of images per chunk of data
+N = 1;                   % number of images per chunk of data
 Nchunks = 1;             % total number of chunks
 json = '256x256.json';   % name of the json file to load
 
@@ -40,21 +40,18 @@ for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure
     for i=1:-1:1
         seed = randi(10000);
-        rng(2137);
+        rng(seed);
         a = [a,seed];
-        [Patch,PatchWithoutGap,AxonSegmentation,BoutonSegmentation,...
-            GTPointsWithoutGap,GTPointsWithGap,...
-            InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize] = getPatch(parameters);
+        [Patch,AxonSegmentation,BoutonSegmentation,GTPoints,InfoGTPoints,gapindices]...
+            = getPatch(parameters);
         images(:,:,i) = Patch;
         axon_masks(:,:,i) = AxonSegmentation;
         bouton_masks(:,:,i) = BoutonSegmentation;
         
         figure; imagesc(images(:,:,i)); colormap(gray);
-        %          data(i).GTPointsWithoutGap = GTPointsWithoutGap;
-        %          data(i).GTPointsWithGap = GTPointsWithGap;
-        %          data(i).InfoGTPointsWithoutGap = InfoGTPointsWithoutGap;
-        %          data(i).InfoGTPointsWithGap = InfoGTPointsWithGap;
-        %          data(i).GapSizes = GapSize;
+        %          data(i).GTPoints = GTPoints;
+        %          data(i).InfoGTPoints = InfoGTPoints;
+        %          data(i).gapindices = gapindices;
         if mod(i,50)==0
             disp(i);
         end
@@ -81,3 +78,5 @@ toc
 %TODO :
 % -make that the bouton can't be on another axon
 % -fix boutons problem in time series model (getBoutons line 49)
+% -prevent cells to be drawn on top of TB
+% -speed up PixDistToAxon

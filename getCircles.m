@@ -1,5 +1,5 @@
-function [NewAxonsPatch, NbCircles] = getCircles(AxonsPatch,height,width,sigma_noise_circle,MinNbCircles,MaxNbCircles,...
-    CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius)
+function NewAxonsPatch = getCircles(AxonsPatch,height,width,sigma_noise_circle,MinNbCircles,MaxNbCircles,...
+    MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius)
 
 % This function takes an image as input and returns the same image with
 % circles having been added. We randomly pick the center of the circle and

@@ -1,6 +1,5 @@
 function [finalAxonsSeries,finalAxonSegmentation,finalBoutonSegmentation,...
-    rotatedAxonsGTPointsWithoutGap,rotatedAxonsGTPointsWithGap,...
-    InfoGTPointsWithoutGap,InfoGTPointsWithGap,GapSize]...
+    rotatedAxonsGTPoints,InfoGTPoints,gapindices]...
     = getSeries(parameters)
 
 % Main function for creating one image. The image is progressively filled
@@ -61,8 +60,8 @@ function [finalAxonsSeries,finalAxonSegmentation,finalBoutonSegmentation,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
     StepSize,NSplinePoints,crossingOK,straightBranching,SegmentationThreshold,...
     sigma_spread,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod,AxonProfile,BranchProfile,sigma_noise_axon,...
-    MinNbBouton,MaxNbBouton,MinBouRadius,MaxBouRadius,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,minDistBetweenBoutons,...
-    MinNbCircles,MaxNbCircles,CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
+    MinNbBouton,MaxNbBouton,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,minDistBetweenBoutons,...
+    MinNbCircles,MaxNbCircles,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
     = getValues(parameters);
 
 restart=0;
@@ -77,23 +76,16 @@ while restart==0
     NBran = randi([MinBran MaxBran],1,NAxons);           % numbers of branchse per axons
     thickness = randi([round(MinThickness*100),...
         round(MaxThickness*100)],1,sum(NBran))/100;      % thicknesses of the different branches
-    GapSize = zeros(1,sum(NBran));                       % size of the gap in each branch
     TotalPoints = sum(NBran)*NSplinePoints;              % number of interpolating points
-    AxonsGTPointsWithoutGap = zeros(2,TotalPoints);      % vector of the interpolating points
-    AxonsGTPointsWithGap = [];                           % vector of the interpolating points with gap
-    variationsWithoutGap = zeros(1,TotalPoints);         % vector of the intensity variations
-    variationsWithGap = [];                              % vector on the intensity variations once gaps have been inserted
+    AxonsGTPoints = zeros(2,TotalPoints);      % vector of the interpolating points
+    variations = zeros(1,TotalPoints);         % vector of the intensity variations
     pointer = 0;                                         % points to the current branch
     pointerAxon = 1;                                     % points to the start of the current axon in the GTPoints
-    AxonsDistWithoutGap = Inf*ones(height,width);        % distance to the AxonsGTPoints without taking gaps into account
-    AxonsDistWithGap = Inf*ones(height,width);           % distance to the AxonsGTPoints
-    AxonsVariationsWithGap = Inf*ones(height,width);     % describes intensity variations along axons taking gaps into account
-    AxonsVariationsWithoutGap = Inf*ones(height,width);  % describes intensity variations but without gaps
-    InfoGTPointsWithoutGap = [];                         % contains info about interpolating points
-    InfoGTPointsWithGap = [];
-    
-    
-    
+    AxonsDist = Inf*ones(height,width);        % distance to the AxonsGTPoints without taking gaps into account
+    AxonsVariations = Inf*ones(height,width);  % describes intensity variations but without gaps
+    InfoGTPoints = [];                         % contains info about interpolating points
+    gapindices = [];
+
     
     for z=1:NAxons
         
@@ -114,7 +106,7 @@ while restart==0
                 startOK = 0;
                 while startOK==0
                     [start,v] = getstartcoords(height,width);%randomly select the starting point
-                    if AxonsDistWithoutGap(start(1),start(2))==Inf %checks if it belongs to an existing branch
+                    if AxonsDist(start(1),start(2))==Inf %checks if it belongs to an existing branch
                         startOK = 1;
                     end
                 end
@@ -136,20 +128,20 @@ while restart==0
             AxonPoly = MakeAxonPoly(ControlPoints);
             
             %matrix containing the points of the spline
-            AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints); %coordinates of the GT Points
+            AxonsGTPoints(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
             
             %fills the variation vector for this branch
-            variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
+            [variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints), gapidx] = makeVariation...
                 (MinAxonIntensity+0.01+(MaxAxonIntensity-MinAxonIntensity-0.02)*rand(1),AxonProfile,NSplinePoints,MinAxonIntensity,...
-                MaxAxonIntensity,MinPeriod,MaxPeriod);
+                MaxAxonIntensity,MinPeriod,MaxPeriod,MinGapSize,MaxGapSize);
             
             %gets the distance to the GTPoints of the pixels belonging to the spline
-            [BranchDistWithoutGap,BranchDistWithGap,BranchVariationsWithoutGap,BranchVariationsWithGap,GapSize(1+pointer),newAxonGTPoints,newVariations] = ...
-                PixDistanceToAxon(width,height,AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
-                thickness(pointer+1),MinGapSize,MaxGapSize,variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
+            [BranchDist,BranchVariations] = ...
+                PixDistanceToAxon(width,height,AxonsGTPoints(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
+                thickness(pointer+1),variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
             
             %now we check if the spline crosses existing axons
-            if ~crossingOK && isempty(find((BranchDistWithoutGap~=Inf & AxonsDistWithoutGap~=Inf),1))
+            if ~crossingOK && isempty(find((BranchDist~=Inf & AxonsDist~=Inf),1))
                 cross = 0;
             else ncross = ncross+1;
             end
@@ -159,16 +151,12 @@ while restart==0
         if restart==1, break, end
         
         % updates the matrices with the new branch
-        AxonsDistWithGap = min(AxonsDistWithGap,BranchDistWithGap);
-        AxonsDistWithoutGap = min(AxonsDistWithoutGap,BranchDistWithoutGap);
-        AxonsVariationsWithGap = min(AxonsVariationsWithGap,BranchVariationsWithGap);
-        AxonsVariationsWithoutGap = min(AxonsVariationsWithoutGap,BranchVariationsWithoutGap);
+        AxonsDist = min(AxonsDist,BranchDist);
+        AxonsVariations = min(AxonsVariations,BranchVariations);
         
         % updates info and AxonsGTPointsWithGap
-        AxonsGTPointsWithGap = cat(2,AxonsGTPointsWithGap,newAxonGTPoints);
-        variationsWithGap = cat(2,variationsWithGap,newVariations);
-        InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
-        InfoGTPointsWithGap = cat(2,InfoGTPointsWithGap,[z*ones(1,size(newAxonGTPoints,2));ones(1,size(newAxonGTPoints,2));(pointer+1)*ones(1,size(newAxonGTPoints,2))]);
+        InfoGTPoints = cat(2,InfoGTPoints,[z*ones(1,NSplinePoints);ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
+        gapindices = cat(2,gapindices, gapidx);
         
         pointer = pointer+1;
         
@@ -179,12 +167,15 @@ while restart==0
         for i=2:NBran(z)
             cross=1;
             while cross
-                indicesCurrentAxon = InfoGTPointsWithGap(1,:)==z;
-                CurrentAxonGTPoints = AxonsGTPointsWithGap(:,indicesCurrentAxon);
-                CurrentAxonVariations = variationsWithGap(indicesCurrentAxon);
-                s = randi([2,size(CurrentAxonGTPoints,2)]);
-                ControlPoints = CurrentAxonGTPoints(:,s);
-                v = CurrentAxonGTPoints(:,s) - CurrentAxonGTPoints(:,s-1);
+                startOK = 1;
+                while startOK
+                    s = randi([pointerAxon+1,pointerAxon+NSplinePoints*(i-1)]);
+                    if ~ismember(s,gapindices)
+                        startOK = 0;
+                    end
+                end
+                ControlPoints = AxonsGTPoints(:,s);
+                v = AxonsGTPoints(:,s) - AxonsGTPoints(:,s-1);
                 AtTerminalState = 0;                                     %reinitialize value for testing
                 while ~AtTerminalState
                     if size(ControlPoints,2) == 1
@@ -203,14 +194,14 @@ while restart==0
                 ControlPoints(2,end) = max(ControlPoints(2,end),1);
                 
                 AxonPoly = MakeAxonPoly(ControlPoints);
-                AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
+                AxonsGTPoints(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints) = getAxonsGTPoints(AxonPoly,NSplinePoints);
                 
-                variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints) = makeVariation...
-                    (CurrentAxonVariations(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod);
+                [variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints), gapidx] = makeVariation...
+                    (variations(s),BranchProfile,NSplinePoints,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod,MinGapSize,MaxGapSize);
                 
-                [BranchDistWithoutGap,BranchDistWithGap,BranchVariationsWithoutGap,BranchVariationsWithGap,GapSize(1+pointer),newAxonGTPoints, newVariations]...
-                    = PixDistanceToAxon(width,height,AxonsGTPointsWithoutGap(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
-                    thickness(pointer+1),MinGapSize,MaxGapSize,variationsWithoutGap(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
+                [BranchDist,BranchVariations]...
+                    = PixDistanceToAxon(width,height,AxonsGTPoints(:,1+pointer*NSplinePoints:pointer*NSplinePoints+NSplinePoints),...
+                    thickness(pointer+1),variations(1+pointer*NSplinePoints:NSplinePoints+pointer*NSplinePoints));
                 
                 % checks if the new branch crosses already existing branches
                 if crossingOK
@@ -218,7 +209,7 @@ while restart==0
                 else
                     % as branches obviously cross their mother branch, we need a special function that checks the crossing only at
                     % a given distance from the branching point
-                    cross=checkCrossings(AxonsDistWithoutGap,BranchDistWithoutGap,straightBranching*thickness(pointer+1),ControlPoints(:,1));
+                    cross=checkCrossings(AxonsDist,BranchDist,straightBranching*thickness(pointer+1),ControlPoints(:,1));
                     if cross==1, ncross = ncross+1; end
                 end
                 if ncross>60, disp('restarting drawing'); restart = 1; end
@@ -227,16 +218,12 @@ while restart==0
             if restart==1, break, end
             
             % updates the matrices with the new branch
-            AxonsDistWithGap = min(AxonsDistWithGap,BranchDistWithGap);
-            AxonsDistWithoutGap = min(AxonsDistWithoutGap,BranchDistWithoutGap);
-            AxonsVariationsWithGap = min(AxonsVariationsWithGap,BranchVariationsWithGap);
-            AxonsVariationsWithoutGap = min(AxonsVariationsWithoutGap,BranchVariationsWithoutGap);
+            AxonsDist = min(AxonsDist,BranchDist);
+            AxonsVariations = min(AxonsVariations,BranchVariations);
             
             % updates info and AxonsGTPointsWithGap
-            AxonsGTPointsWithGap = cat(2,AxonsGTPointsWithGap,newAxonGTPoints);
-            variationsWithGap = cat(2,variationsWithGap,newVariations);
-            InfoGTPointsWithoutGap = cat(2,InfoGTPointsWithoutGap,[z*ones(1,NSplinePoints);i*ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
-            InfoGTPointsWithGap = cat(2,InfoGTPointsWithGap,[z*ones(1,size(newAxonGTPoints,2));i*ones(1,size(newAxonGTPoints,2));(pointer+1)*ones(1,size(newAxonGTPoints,2))]);
+            InfoGTPoints = cat(2,InfoGTPoints,[z*ones(1,NSplinePoints);i*ones(1,NSplinePoints);(pointer+1)*ones(1,NSplinePoints)]);
+            gapindices = cat(2,gapindices, gapidx);
             
             pointer = pointer+1;
             
@@ -249,17 +236,23 @@ while restart==0
 end
 disp(ncross);
 
-
 %%%%%%%%%%%%%%%% obtain rotated versions of the main image %%%%%%%%%%%%%%%%
 
-[rotatedCopies, rotatedSegmentations, rotatedAxonsGTPointsWithoutGap, rotatedAxonsGTPointsWithGap, height, width] = getRotatedIntensityMatrices...
-    (AxonsDistWithoutGap, AxonsDistWithGap, AxonsGTPointsWithoutGap, AxonsGTPointsWithGap, AxonsVariationsWithGap,variationsWithoutGap,...
-    variationsWithGap, height, width, NbImages, padding_thickness, thetas, SegmentationThreshold, sigma_noise_axon, sigma_spread);
+[rotatedCopies, rotatedSegmentations, rotatedAxonsGTPoints, height, width] = getRotatedIntensityMatrices...
+    (AxonsDist, AxonsGTPoints, AxonsVariations,variations, height, width, NbImages, padding_thickness,...
+    thetas, SegmentationThreshold, sigma_noise_axon, sigma_spread);
 
 %%%%%%%%%%%%%%%%%% adding circles representing boutons %%%%%%%%%%%%%%%%%%%%
 
 %modifies the AxonPatch matrix to add boutons, and creates the bouton
 %segmentation
+rotatedAxonsGTPointsWithGap = rotatedAxonsGTPoints; 
+rotatedAxonsGTPointsWithGap(:,gapindices,:) = [];
+variationsWithGap = variations;
+variationsWithGap(gapindices) = [];
+InfoGTPointsWithGap = InfoGTPoints;
+InfoGTPointsWithGap(:,gapindices,:) = [];
+
 [AxonsSeries,BoutonSegmentation] = getBoutons(rotatedCopies, rotatedAxonsGTPointsWithGap, variationsWithGap, MinNbBouton, MaxNbBouton,...
     MinBrightnessBouton, MaxBrightnessBouton, sigma_noise_bouton, height, width, thickness, sigma_spread, sigma_noise_axon,...
     InfoGTPointsWithGap, minDistBetweenBoutons,NbImages, probBoutonInFirstImage, rowshift, colshift, finalHeight, finalWidth);
@@ -267,8 +260,7 @@ disp(ncross);
 %%%%%%%%%%%%%%%%%%% adding circles representing cells %%%%%%%%%%%%%%%%%%%%%
 
 % modifies Axonspatch to add circles
-[AxonsSeries, ~] = getCircles...
-    (AxonsSeries,height,width,sigma_noise_circle,MinNbCircles,MaxNbCircles,CircleBrightness,...
+AxonsSeries = getCircles(AxonsSeries,height,width,sigma_noise_circle,MinNbCircles,MaxNbCircles,...
     MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius);
 
 %%%%%%%%%%%%%%%%%%%%%%%% adding different noises %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -294,8 +286,8 @@ function [width,height,negative_image,maxIntensity,...
     conformity,MinThickness, MaxThickness,MinGapSize,MaxGapSize,...
     StepSize,NSplinePoints,crossingOK,straightBranching,SegmentationThreshold,...
     sigma_spread,MinAxonIntensity,MaxAxonIntensity,MinPeriod,MaxPeriod,AxonProfile,BranchProfile,sigma_noise_axon,...
-    MinNbBouton,MaxNbBouton,MinBouRadius,MaxBouRadius,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,minDistBetweenBoutons,...
-    MinNbCircles,MaxNbCircles,CircleBrightness,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
+    MinNbBouton,MaxNbBouton,MinBrightnessBouton,MaxBrightnessBouton,sigma_noise_bouton,minDistBetweenBoutons,...
+    MinNbCircles,MaxNbCircles,MinBrightnessCircles,MaxBrightnessCircles,MinRadius,MaxRadius,sigma_noise_circle]...
     = getValues(parameters)
 
 % This function takes out the parameters from the structure
@@ -345,8 +337,6 @@ sigma_noise_axon = parameters(1).sigma_noise_axon;
 
 MinNbBouton = parameters(1).MinNbBouton;
 MaxNbBouton = parameters(1).MaxNbBouton;
-MinBouRadius = parameters(1).MinBouRadius;
-MaxBouRadius = parameters(1).MaxBouRadius;
 MinBrightnessBouton  = parameters(1).MinBrightnessBouton;
 MaxBrightnessBouton  = parameters(1).MaxBrightnessBouton;
 sigma_noise_bouton = parameters(1).sigma_noise_bouton;
@@ -356,7 +346,6 @@ MinNbCircles = parameters(1).MinNbCircles;
 MaxNbCircles = parameters(1).MaxNbCircles;
 MinRadius = parameters(1).MinRadius;
 MaxRadius = parameters(1).MaxRadius;
-CircleBrightness = parameters(1).CircleBrightness;
 MinBrightnessCircles = parameters(1).MinBrightnessCircles;
 MaxBrightnessCircles = parameters(1).MaxBrightnessCircles;
 sigma_noise_circle = parameters(1).sigma_noise_circle;
