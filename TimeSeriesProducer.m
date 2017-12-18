@@ -33,7 +33,6 @@ bouton_mask_files = 'path_to_file/file_name';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% data generation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a=[];
 parameters=loadjson(json);
 for chunk=1:Nchunks
     %creates N images with associated parameters stored in 'data' structure

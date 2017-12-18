@@ -145,7 +145,7 @@ while restart==0
                 cross = 0;
             else ncross = ncross+1;
             end
-            if ncross>60, disp('restarting drawing'); restart = 1; end
+            if ncross>60, restart = 1; end
             if restart==1, break, end
         end
         if restart==1, break, end
@@ -212,7 +212,7 @@ while restart==0
                     cross=checkCrossings(AxonsDist,BranchDist,straightBranching*thickness(pointer+1),ControlPoints(:,1));
                     if cross==1, ncross = ncross+1; end
                 end
-                if ncross>60, disp('restarting drawing'); restart = 1; end
+                if ncross>60, restart = 1; end
                 if restart==1, break, end
             end
             if restart==1, break, end
@@ -234,7 +234,6 @@ while restart==0
     else restart = 1;
     end
 end
-disp(ncross);
 
 %%%%%%%%%%%%%%%% obtain rotated versions of the main image %%%%%%%%%%%%%%%%
 

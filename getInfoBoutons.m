@@ -103,12 +103,13 @@ switch nargin
                     next_point = getNextPoint(AxonsGTPoints,idx,InfoGTPoints);
                     R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
                     new_center = round(point(:,:,1)+rho/sqrt(sum((next_point(:,:,1)-point(:,:,1)).^2))*R*(next_point(:,:,1)-point(:,:,1)));
-                    
-                    if (new_center(1)>rowshift && new_center(1)<=rowshift+finalWidth && new_center(2)>colshift && new_center(2)<=colshift+finalHeight...
-                            && (bou==1 || min(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons))
-                        for i=2:NbImages
+                    for i=2:NbImages
                             new_center = [new_center,round(point(:,:,i)+rho/sqrt(sum((next_point(:,:,i)-point(:,:,i)).^2))*R*(next_point(:,:,i)-point(:,:,i)))];
-                        end
+                    end
+                    if (all(new_center(1,:)>rowshift) && all(new_center(1,:)<=rowshift+finalWidth) && ...
+                        all(new_center(2,:)>colshift) && all(new_center(2,:)<=colshift+finalHeight) && ...
+                        (bou==1 || min(distE(centers(1,:),centers(2,:),new_center)) > minDistBetweenBoutons))
+                        
                         new_center = reshape(new_center,[2,1,NbImages]);
                         boutonsInfo{bou,2} = new_center;
                         centers = [centers,new_center(:,:,1)];
@@ -138,11 +139,12 @@ switch nargin
                     idx = randi(size(AxonsGTPoints,2));
                     Points(bou) = idx;
                     points = round(AxonsGTPoints(:,idx,:));
-                    if (points(1,1,1)>rowshift && points(1,1,1)<=rowshift+finalWidth && points(2,1,1)>colshift && points(2,1,1)<=colshift+finalHeight ...
-                            && (bou==1 || min(distE(centers(1,:),centers(2,:),points(:,:,1))) > minDistBetweenBoutons))
-                        boutonsInfo{bou,2} = points;
-                        centers = [centers,points(:,:,1)];
-                        bouton_ok = 0;
+                    if (all(points(1,:,:)>rowshift) && all(points(1,:,:)<=rowshift+finalWidth) && ...
+                        all(points(2,:,:)>colshift) && all(points(2,:,:)<=colshift+finalHeight) && ...
+                        (bou==1 || min(distE(centers(1,:),centers(2,:),points(:,:,1))) > minDistBetweenBoutons))
+                            boutonsInfo{bou,2} = points;
+                            centers = [centers,points(:,:,1)];
+                            bouton_ok = 0;
                     end
                 end
             end
