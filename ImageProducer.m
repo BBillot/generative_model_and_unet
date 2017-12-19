@@ -37,7 +37,7 @@ for chunk=1:Nchunks
     
     %creates N images with associated parameters stored in 'data' structure
     for i=N:-1:1
-
+        
         %create individual image
         [Patch,AxonSegmentation,BoutonSegmentation,GTPoints,InfoGTPoints,gapindices]...
             = getPatch(parameters);
