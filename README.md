@@ -40,11 +40,11 @@ example of an image obtained with ImageProducer:
 
 example of a time-serie obtained with TimeSeriesProducer:
 
-![Alt text](time-serie-images.png?raw=true "example of a time-serie obtained with TimeSeriesProducer")
+![Alt text](images/time-serie-images.png?raw=true "example of a time-serie obtained with TimeSeriesProducer")
 
 example of the obtained segmentation:
 
-![Alt text](predicted.png?raw=true "example of the obtained segmentation")
+![Alt text](images/predicted.png?raw=true "example of the obtained segmentation")
 
 a) original image
 b) corresponding Ground Truth segmentation
