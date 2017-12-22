@@ -36,7 +36,7 @@ IMAGES EXAMPLES
 
 example of an image obtained with ImageProducer: 
 
-![Alt text](single_image.png?raw=true "example of image obtained with ImageProducer")
+![Alt text](images/single_image.png?raw=true "example of image obtained with ImageProducer")
 
 example of a time-serie obtained with TimeSeriesProducer:
 
