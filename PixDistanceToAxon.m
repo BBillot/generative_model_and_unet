@@ -3,27 +3,27 @@ function [BranchDist,BranchVariations]= PixDistanceToAxon(height,width,AxonGTPoi
 % If this function is used to draw several branches, where the gaps have
 % already been defined, set both Min/MaxGapSize to 0.
 
-[X,Y] = meshgrid(1:height,1:width);             % Meshgrid matrices
+BranchDist = Inf*ones(height,width);            % Create a distance matrix initialised with "inf"
+BranchVariations = Inf(height,width);           % Create a variation matrix initialised with "Inf"
+[X,Y] = meshgrid(1:height,1:width);                       % Meshgrid matrices
 
-mx = max(height+1,width+1);
-variations(AxonGTPoints(1,:)<1 |AxonGTPoints(2,:)<1 | AxonGTPoints(1,:)>height |AxonGTPoints(2,:)>width) = [];
-AxonGTPoints(:,any(AxonGTPoints<1)) = mx;
-AxonGTPoints(:,AxonGTPoints(1,:) > height | AxonGTPoints(2,:)> width) = [];
-
-BranchDist=sqrt(( repmat(X(:),[1,size(AxonGTPoints,2)]) - repmat(AxonGTPoints(1,:), [size(X(:),1),1]) ).^2 + ...
-    (repmat(Y(:),[1,size(AxonGTPoints,2)]) - repmat(AxonGTPoints(2,:), [size(X(:),1),1]) ).^2);
-
-[BranchDist,BranchVariations] = min(BranchDist,[],2);
-BranchDist(BranchDist>thickness) = Inf;
-
-BranchDist = reshape(BranchDist,[height,width]);
-BranchVariations = reshape(BranchVariations, [height,width]);
-
-for i=1:height
-    for j=1:width
-        BranchVariations(i,j) = variations(BranchVariations(i,j));
+%loop over the gt points out of the gap
+for n = 1:size(AxonGTPoints,2)
+    if AxonGTPoints(1,n)>0 && AxonGTPoints(1,n)<=height && AxonGTPoints(2,n)>0 && AxonGTPoints(2,n)<=width
+        Dist = distE(X,Y,AxonGTPoints(:,n)); %gets distance between a GT point and all the pixels
+        Indices = find(Dist<thickness); %gets the indices of the closest points
+        if ~isempty(Indices)
+            for i = 1:length(Indices)
+                thisRow = X(Indices(i));
+                thisCol = Y(Indices(i));
+                a = min(BranchDist(thisRow,thisCol),Dist(Indices(i)));
+                if a==Dist(Indices(i)) %checks if the distance if inferior to smallest distance calculated yet
+                    BranchDist(thisRow,thisCol) = a; %in the corresponding pixel value is set to that distance
+                    BranchVariations(thisRow,thisCol) = variations(n); %correpsonding multiplicative coef also inserted
+                end
+            end
+        end
     end
 end
-BranchVariations = bsxfun(@times,BranchVariations, BranchDist<Inf);
 
 end
