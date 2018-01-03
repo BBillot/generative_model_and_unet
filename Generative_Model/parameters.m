@@ -33,8 +33,8 @@ MaxBran = 2;                 % Set maximum number of branches for an axon (integ
 conformity = 0.99;           % Set how straight the axon is (real number between 0 and 0.9999)
 MinThickness = 1.5;          % Set Min thickness of vessels (real number)
 MaxThickness = 3;            % Set Max thickness of vessels (real number)
-MinGapSize = 1;              % Set gap size (positive integer)
-MaxGapSize = 4;              % if you don't want any gap set both to 0 (positive integer)
+MinGapSize = 0;              % Set gap size (positive integer)
+MaxGapSize = 8;              % if you don't want any gap set both to 0 (positive integer)
 
 % Construction of axons
 StepSize = 2;                % distance between each controlPoints. (real number)
