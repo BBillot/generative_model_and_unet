@@ -8,7 +8,7 @@ This project attempts to perform axon segmentation of cortical images by using a
 
 ----------------
 
-MODEL:
+### GENERATIVE MODEL OF SURROGATE IMAGE:
 
 - By running ImageProducer.m one would produce 4 3D-matrices. The first one contains 2D independent images, the second provides their corresponding binary segmentation, the 3rd one returns the same images cleaned from all sources of noise, and the 4th one gives back the bouton segmentation.
 
@@ -20,7 +20,7 @@ MODEL:
 
 ----------------
 
-CNN FOR SEGMENTATION:
+### CNN FOR SEGMENTATION:
 
 - The main script is unets.py
 
@@ -32,7 +32,7 @@ CNN FOR SEGMENTATION:
 
 ----------------
 
-IMAGES EXAMPLES
+### IMAGES EXAMPLES
 
 example of an image obtained with ImageProducer: 
 
@@ -42,6 +42,23 @@ example of a time-serie obtained with TimeSeriesProducer:
 
 ![Alt text](images/time-serie-images.png?raw=true "example of a time-serie obtained with TimeSeriesProducer")
 
+----------------
+
+### RESULTS
+
+This table summarizes the conducted experiments and their corresponding results.
+The number of images used was the same for all the experiments (26,200). 
+We can observe that the accuracy remains at a high level, even when the ratio of real images used is decreased.
+This highlights that the generated images can efficiently be used to augment the number of training examples in the case of small datasets.  
+
+| experiments| proportion of real images | accuracy of segmentation |
+|:----------:| :-----------------------: |:------------------------:|
+|      1     |           100%            |            65.1%         |
+|      2     |            25%            |            63.5%         |
+|      3     |             0%            |            58.3%         |  
+
+
+
 example of the obtained segmentation:
 
 ![Alt text](images/predicted.png?raw=true "example of the obtained segmentation")
@@ -49,7 +66,7 @@ example of the obtained segmentation:
 a) original image
 b) corresponding Ground Truth segmentation
 c) segmentation obtained after having trained the network with real images
-d) segmentation obtained after having trained the network with generated images
+d) segmentation obtained after having trained the network only with generated images
 
 ----------------
 
@@ -57,4 +74,4 @@ FOR MORE INFORMATION:
 
 The report I wrote for my MSc thesis explains in more details the model and how it was validated by training a UNet-like Neural Network to perform segmentation of real images. A list of the model's parameters is also provided along with explanations.
 
-If you have any question you can contact me at : benjamin.billot16@imperial.ac.ic    
+You can contact me at : benjamin.billot16@imperial.ac.ic    
